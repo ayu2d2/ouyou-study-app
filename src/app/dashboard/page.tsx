@@ -30,10 +30,9 @@ export default function DashboardPage() {
 
   // 未ログインの場合はトップページにリダイレクト
   useEffect(() => {
-    // 一時的にコメントアウト - ログイン機能をテストするため
-    // if (status !== 'loading' && !session) {
-    //   router.push('/')
-    // }
+    if (status !== 'loading' && !session) {
+      router.push('/')
+    }
   }, [session, status, router])
 
   // ローディング中
@@ -49,41 +48,40 @@ export default function DashboardPage() {
   }
 
   // 未ログインの場合は何も表示しない（リダイレクト中）
-  // 一時的にコメントアウト - ログイン機能をテストするため
-  // if (!session) {
-  //   return null
-  // }
+  if (!session) {
+    return null
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-6">
         {/* ヘッダー */}
-        <header className="flex justify-between items-start mb-6 sm:mb-8">
-          <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+        <header className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4 sm:mb-6 lg:mb-8">
+          <div className="flex-1 w-full sm:w-auto">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
               応用情報技術者試験 勉強アプリ
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-1">
+            <p className="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">
               継続は力なり！毎日コツコツ勉強しよう
             </p>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto justify-between sm:justify-end">
             {/* フレンドボタン */}
             <button
               onClick={() => router.push('/friends')}
-              className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-lg flex items-center transition-colors"
+              className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg flex items-center transition-colors text-sm"
             >
-              <Users className="w-4 h-4 mr-1" />
-              <span className="text-sm font-medium">フレンド</span>
+              <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              <span className="font-medium">フレンド</span>
             </button>
             
             {/* 連続記録表示 */}
-            <div className="flex items-center bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 px-3 py-2 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
+            <div className="flex items-center bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <div className="w-4 h-4 sm:w-6 sm:h-6 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-xs">🔥</span>
                 </div>
-                <div className="text-sm font-semibold">
+                <div className="text-xs sm:text-sm font-semibold">
                   {currentStreak}日連続
                 </div>
               </div>
@@ -93,22 +91,21 @@ export default function DashboardPage() {
         </header>
 
         {/* メインコンテンツ */}
-        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* 左カラム: 勉強時間 */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* 今日の勉強時間 */}
+        <div className="grid lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+          {/* 左カラム: 勉強時間とストリーク */}
+          <div className="lg:col-span-2 space-y-3 sm:space-y-4 lg:space-y-6">{/* 今日の勉強時間 */}
             <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4">
               <div className="text-center">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center justify-center">
+                <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-800 mb-2 sm:mb-3 lg:mb-4 flex items-center justify-center">
                   <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-500" />
                   今日の勉強時間
                 </h2>
                 
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-3 sm:p-4 mb-3">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-mono font-bold text-blue-600 mb-1">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-2 sm:p-3 lg:p-4 mb-2 sm:mb-3">
+                  <div className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-mono font-bold text-blue-600 mb-1">
                     {formatTime(todayStudyTime)}
                   </div>
-                  <div className="text-sm sm:text-base text-blue-500 font-medium">
+                  <div className="text-xs sm:text-sm lg:text-base text-blue-500 font-medium">
                     {Math.floor(todayStudyTime / 3600) > 0 ? 
                       `${Math.floor(todayStudyTime / 3600)}時間${Math.floor((todayStudyTime % 3600) / 60)}分${todayStudyTime % 60}秒` :
                       Math.floor(todayStudyTime / 60) > 0 ?
@@ -120,7 +117,7 @@ export default function DashboardPage() {
 
                 {/* 勉強状態の表示 */}
                 {isStudying ? (
-                  <div className="flex items-center justify-center space-x-2 bg-green-100 text-green-800 px-3 py-2 rounded-full text-sm">
+                  <div className="flex items-center justify-center space-x-2 bg-green-100 text-green-800 px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     <span className="font-semibold">勉強中</span>
                     <span className="font-mono">{formatTime(currentSession)}</span>
@@ -134,38 +131,38 @@ export default function DashboardPage() {
             </div>
 
             {/* ストリーク情報 */}
-            <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl shadow-lg p-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
-                <Trophy className="w-5 h-5 mr-2 text-orange-500" />
+            <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl shadow-lg p-3 sm:p-4">
+              <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2 sm:mb-3 flex items-center">
+                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-orange-500" />
                 学習ストリーク
               </h3>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600 mb-1">
+                  <div className="text-xl sm:text-2xl font-bold text-orange-600 mb-1">
                     {currentStreak}
                   </div>
-                  <div className="text-sm text-gray-600">現在のストリーク</div>
+                  <div className="text-xs sm:text-sm text-gray-600">現在のストリーク</div>
                   <div className="text-xs text-gray-500">連続学習日数</div>
                 </div>
                 
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600 mb-1">
+                  <div className="text-xl sm:text-2xl font-bold text-red-600 mb-1">
                     {maxStreak}
                   </div>
-                  <div className="text-sm text-gray-600">最大ストリーク</div>
+                  <div className="text-xs sm:text-sm text-gray-600">最大ストリーク</div>
                   <div className="text-xs text-gray-500">過去最高記録</div>
                 </div>
               </div>
               
-              <div className="mt-3 text-center">
+              <div className="mt-2 sm:mt-3 text-center">
                 {hasStudiedToday ? (
-                  <div className="flex items-center justify-center space-x-2 text-green-600 text-sm">
+                  <div className="flex items-center justify-center space-x-2 text-green-600 text-xs sm:text-sm">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     <span>今日の学習完了！</span>
                   </div>
                 ) : (
-                  <div className="text-orange-600 text-sm">
+                  <div className="text-orange-600 text-xs sm:text-sm">
                     今日はまだ学習していません
                     <div className="text-xs text-gray-500 mt-1">
                       10分以上の学習でストリークカウント
@@ -177,7 +174,7 @@ export default function DashboardPage() {
           </div>
 
           {/* 右カラム: 過去問ポータル */}
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-3 sm:space-y-4 lg:space-y-6">
             <StudyPortal 
               onStudyStart={() => !isStudying && toggleStudying()}
               onStudyStop={() => isStudying && toggleStudying()}
@@ -189,7 +186,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ランキング */}
-        <div className="mt-6 max-w-4xl mx-auto">
+        <div className="mt-4 sm:mt-6 max-w-4xl mx-auto">
           <Ranking currentStudyTime={todayStudyTime} />
         </div>
       </div>

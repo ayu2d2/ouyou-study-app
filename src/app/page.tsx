@@ -66,88 +66,88 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 flex flex-col">
       {/* ヘッダー */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-800">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 text-center sm:text-left">
             応用情報技術者試験 勉強アプリ
           </h1>
         </div>
       </header>
 
       {/* メインコンテンツ */}
-      <main className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="max-w-4xl w-full grid md:grid-cols-2 gap-8 items-center">
+      <main className="flex-1 flex items-center justify-center px-3 sm:px-4 py-6 sm:py-8">
+        <div className="max-w-4xl w-full grid lg:grid-cols-2 gap-6 lg:gap-8 items-center">
           {/* 左側: アプリの説明 */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6 order-2 lg:order-1">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">
                 効率的な学習で<br />
                 <span className="text-indigo-600">合格を目指そう</span>
               </h2>
-              <p className="text-lg text-gray-600 mb-6">
+              <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">
                 応用情報技術者試験の過去問練習と進捗管理ができる学習アプリです。
                 友達と一緒に勉強して、お互いの成長を確認できます。
               </p>
             </div>
 
             {/* 特徴 */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="flex items-center space-x-3">
-                <div className="bg-indigo-100 p-2 rounded-lg">
-                  <BookOpen className="w-6 h-6 text-indigo-600" />
+                <div className="bg-indigo-100 p-2 rounded-lg flex-shrink-0">
+                  <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-800">過去問練習</h3>
-                  <p className="text-sm text-gray-600">豊富な過去問で実力アップ</p>
+                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base">過去問練習</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">豊富な過去問で実力アップ</p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-3">
-                <div className="bg-green-100 p-2 rounded-lg">
-                  <Trophy className="w-6 h-6 text-green-600" />
+                <div className="bg-green-100 p-2 rounded-lg flex-shrink-0">
+                  <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-800">ストリーク</h3>
-                  <p className="text-sm text-gray-600">継続学習で習慣化</p>
+                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base">ストリーク</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">継続学習で習慣化</p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-3">
-                <div className="bg-purple-100 p-2 rounded-lg">
-                  <Users className="w-6 h-6 text-purple-600" />
+                <div className="bg-purple-100 p-2 rounded-lg flex-shrink-0">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-800">友達機能</h3>
-                  <p className="text-sm text-gray-600">みんなで一緒に成長</p>
+                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base">友達機能</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">みんなで一緒に成長</p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-3">
-                <div className="bg-orange-100 p-2 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-orange-600" />
+                <div className="bg-orange-100 p-2 rounded-lg flex-shrink-0">
+                  <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-800">進捗管理</h3>
-                  <p className="text-sm text-gray-600">学習の可視化</p>
+                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base">進捗管理</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">学習の可視化</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* 右側: ログインフォーム */}
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 order-1 lg:order-2">
+            <div className="text-center mb-6 sm:mb-8">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
                 学習を始めましょう
               </h3>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 アカウントにログインして、効率的な学習を開始
               </p>
             </div>
 
             {/* ログインフォーム */}
-            <form onSubmit={handleLogin} className="space-y-6">
+            <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-sm sm:text-base">
                   {error}
                 </div>
               )}
@@ -163,7 +163,7 @@ export default function HomePage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="your@email.com"
                   disabled={isLoading}
                 />
@@ -180,13 +180,13 @@ export default function HomePage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="パスワードを入力"
                   disabled={isLoading}
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
                 <div className="flex items-center">
                   <input
                     id="remember-me"
@@ -209,14 +209,14 @@ export default function HomePage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-sm sm:text-base"
               >
                 {isLoading ? 'ログイン中...' : 'ログイン'}
               </button>
             </form>
 
             {/* デモアカウント情報 */}
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <div className="mt-4 p-3 sm:p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-700 font-medium mb-2">デモアカウント:</p>
               <p className="text-xs text-blue-600">
                 メール: demo@example.com<br />
@@ -225,7 +225,7 @@ export default function HomePage() {
             </div>
 
             {/* 新規登録リンク */}
-            <div className="mt-6 text-center">
+            <div className="mt-4 sm:mt-6 text-center">
               <p className="text-sm text-gray-600">
                 アカウントをお持ちでない場合{' '}
                 <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">
@@ -238,9 +238,9 @@ export default function HomePage() {
       </main>
 
       {/* フッター */}
-      <footer className="bg-gray-800 text-white py-6">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm">
+      <footer className="bg-gray-800 text-white py-4 sm:py-6">
+        <div className="container mx-auto px-3 sm:px-4 text-center">
+          <p className="text-xs sm:text-sm">
             © 2025 応用情報技術者試験 勉強アプリ. All rights reserved.
           </p>
         </div>

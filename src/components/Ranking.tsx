@@ -118,52 +118,52 @@ export default function Ranking({ currentStudyTime = 0 }: { currentStudyTime?: n
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-gray-800 flex items-center">
-          <Trophy className="w-5 h-5 mr-2 text-yellow-500" />
+    <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-4">
+        <h2 className="text-base sm:text-lg font-bold text-gray-800 flex items-center">
+          <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-yellow-500" />
           学習時間ランキング
         </h2>
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg self-start sm:self-auto">
           <button
             onClick={() => setViewMode('list')}
-            className={`p-2 rounded-md transition-colors ${
+            className={`p-1.5 sm:p-2 rounded-md transition-colors ${
               viewMode === 'list'
                 ? 'bg-white text-indigo-600 shadow-sm'
                 : 'text-gray-600 hover:text-indigo-600'
             }`}
           >
-            <List className="w-4 h-4" />
+            <List className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
           <button
             onClick={() => setViewMode('chart')}
-            className={`p-2 rounded-md transition-colors ${
+            className={`p-1.5 sm:p-2 rounded-md transition-colors ${
               viewMode === 'chart'
                 ? 'bg-white text-indigo-600 shadow-sm'
                 : 'text-gray-600 hover:text-indigo-600'
             }`}
           >
-            <BarChart3 className="w-4 h-4" />
+            <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
         </div>
       </div>
 
       {/* ランキングの説明 */}
-      <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-        <p className="text-sm text-blue-700">
+      <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-blue-50 rounded-lg">
+        <p className="text-xs sm:text-sm text-blue-700">
           <strong>フレンドランキング:</strong> あなたとフレンドの学習時間を比較しています。
           フレンドを追加して、みんなで一緒に学習を頑張りましょう！
         </p>
       </div>
 
       {/* 期間選択 */}
-      <div className="mb-4">
-        <div className="flex space-x-1">
+      <div className="mb-3 sm:mb-4">
+        <div className="flex flex-wrap gap-1 sm:gap-2">
           {(['today', 'weekly', 'monthly', 'allTime'] as const).map((type) => (
             <button
               key={type}
               onClick={() => setSelectedType(type)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium transition-colors flex-1 sm:flex-none ${
                 selectedType === type
                   ? 'bg-indigo-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
