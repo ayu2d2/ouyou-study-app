@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // 学習記録
+  studySessions StudySession[]
+  streaks       Streak[]
+  answers       Answer[]
+  
+  // フレンド機能
+  sentFriendRequests     Friendship[] @relation("FriendRequester")
+  receivedFriendRequests Friendship[] @relation("FriendRequestee")
+  
+  // 通知設定
+  pushSubscription String?
+  notificationSettings NotificationSettings?
+  
+  @@map("users")
+}
+
+model StudySession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  startTime DateTime
+  endTime   DateTime?
+  duration  Int?     // 学習時間（分）
+  questions Int      @default(0) // 解いた問題数
+  correct   Int      @default(0) // 正解数
+  category  String?  // 学習分野
+  
+  createdAt DateTime @default(now())
+  
+  @@map("study_sessions")
+}
+
+model Streak {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  date      DateTime @unique
+  count     Int      @default(1)
+  
+  @@map("streaks")
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  content     String   // 問題文
+  choices     Json     // 選択肢（配列）
+  correctAnswer String // 正解
+  explanation String?  // 解説
+  category    String   // 分野
+  difficulty  String   // 難易度
+  year        Int?     // 出題年度
+  
+  answers     Answer[]
+  
+  createdAt   DateTime @default(now())
+  
+  @@map("questions")
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  userAnswer String   // ユーザーの回答
+  isCorrect  Boolean  // 正解かどうか
+  timeSpent  Int?     // 回答にかかった時間（秒）
+  
+  answeredAt DateTime @default(now())
+  
+  @@unique([userId, questionId])
+  @@map("answers")
+}
+
+model Friendship {
+  id          String   @id @default(cuid())
+  requesterId String
+  requester   User     @relation("FriendRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  requesteeId String
+  requestee   User     @relation("FriendRequestee", fields: [requesteeId], references: [id], onDelete: Cascade)
+  
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  acceptedAt  DateTime?
+  
+  @@unique([requesterId, requesteeId])
+  @@map("friendships")
+}
+
+model NotificationSettings {
+  id                    String  @id @default(cuid())
+  userId                String  @unique
+  user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  studyReminder         Boolean @default(true)
+  friendActivity        Boolean @default(true)
+  streakReminder        Boolean @default(true)
+  weeklyReport          Boolean @default(true)
+  
+  reminderTime          String  @default("20:00") // HH:MM format
+  
+  @@map("notification_settings")
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  BLOCKED
+}
