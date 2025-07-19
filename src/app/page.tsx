@@ -1,11 +1,16 @@
 'use client'
 
-import { Play, Pause, Clock, TrendingUp } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { useStudyTimer } from '@/hooks/useStudyTimer'
 import { StudyStats } from '@/components/StudyStats'
 import { StudyPortal } from '@/components/StudyPortal'
+import StreakDisplay from '@/components/StreakDisplay'
+import UserMenu from '@/components/UserMenu'
+import { Play, Pause, Square, Calendar, Clock, TrendingUp } from 'lucide-react'
 
-export default function Home() {
+export default function HomePage() {
+  const { data: session } = useSession()
   const {
     isStudying,
     currentSession,
@@ -16,108 +21,183 @@ export default function Home() {
     studySessions
   } = useStudyTimer()
 
+  // デモ用のデータ（実際にはDBから取得）
+  const [streak, setStreak] = useState(0)
+  const [maxStreak, setMaxStreak] = useState(0)
+  const [level, setLevel] = useState(1)
+  const [exp, setExp] = useState(0)
+  const [maxExp, setMaxExp] = useState(100)
+
+  // 勉強時間からストリークとレベルを計算
+  useEffect(() => {
+    if (session && studySessions.length > 0) {
+      // 簡単なストリーク計算（連続勉強日数）
+      const today = new Date().toDateString()
+      const hasStudiedToday = studySessions.some(session => 
+        new Date(session.date).toDateString() === today
+      )
+      
+      // 実際にはDBから取得するが、デモ用に計算
+      const currentStreak = hasStudiedToday ? Math.floor(todayStudyTime / 1800) + 1 : 0 // 30分で1ストリーク
+      setStreak(Math.min(currentStreak, 100))
+      setMaxStreak(Math.max(maxStreak, currentStreak))
+      
+      // レベルとEXP計算（1時間で10EXP）
+      const totalExp = Math.floor(todayStudyTime / 360) // 6分で1EXP
+      const newLevel = Math.floor(totalExp / 100) + 1
+      const currentExp = totalExp % 100
+      
+      setLevel(newLevel)
+      setExp(currentExp)
+    }
+  }, [todayStudyTime, studySessions, session, maxStreak])
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="container mx-auto px-4 py-6">
         {/* ヘッダー */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-2">
-            📚 AP試験 学習管理アプリ
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            応用情報技術者試験の効率的な学習をサポート
-          </p>
-        </div>
-
-        {/* 学習時間計測パネル */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-white flex items-center">
-              <Clock className="mr-2" />
-              学習時間計測
-            </h2>
-            <button
-              onClick={toggleStudying}
-              className={`flex items-center px-6 py-3 rounded-lg font-medium transition-all transform hover:scale-105 ${
-                isStudying
-                  ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg'
-                  : 'bg-green-500 hover:bg-green-600 text-white shadow-lg'
-              }`}
-            >
-              {isStudying ? (
-                <>
-                  <Pause className="mr-2" size={20} />
-                  学習終了
-                </>
-              ) : (
-                <>
-                  <Play className="mr-2" size={20} />
-                  学習開始
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* 時間表示 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 rounded-xl text-center border border-blue-200 dark:border-blue-800">
-              <h3 className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">現在のセッション</h3>
-              <p className="text-3xl font-bold text-blue-800 dark:text-blue-300">
-                {formatTime(currentSession)}
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-6 rounded-xl text-center border border-green-200 dark:border-green-800">
-              <h3 className="text-sm font-medium text-green-600 dark:text-green-400 mb-2">今日の学習時間</h3>
-              <p className="text-3xl font-bold text-green-800 dark:text-green-300">
-                {formatTime(todayStudyTime)}
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-6 rounded-xl text-center border border-purple-200 dark:border-purple-800">
-              <h3 className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-2">累計学習時間</h3>
-              <p className="text-3xl font-bold text-purple-800 dark:text-purple-300">
-                {formatTime(totalStudyTime)}
-              </p>
-            </div>
-          </div>
-
-          {/* 学習状態インジケーター */}
-          {isStudying && (
-            <div className="flex items-center justify-center p-4 bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 rounded-xl border border-green-300 dark:border-green-700">
-              <div className="animate-pulse w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-              <span className="text-green-700 dark:text-green-300 font-medium">学習中... 集中して頑張りましょう！</span>
-            </div>
-          )}
-        </div>
-
-        {/* 2カラムレイアウト */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 左カラム: 過去問道場 */}
+        <header className="flex justify-between items-center mb-8">
           <div>
-            <StudyPortal />
+            <h1 className="text-3xl font-bold text-gray-800">
+              応用情報技術者試験 勉強アプリ
+            </h1>
+            <p className="text-gray-600 mt-1">
+              継続は力なり！毎日コツコツ勉強しよう
+            </p>
           </div>
+          <UserMenu />
+        </header>
 
-          {/* 右カラム: 統計・進捗 */}
-          <div className="space-y-8">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 dark:text-white flex items-center mb-6">
-                <TrendingUp className="mr-2" />
-                学習統計
-              </h2>
-              <StudyStats 
-                totalStudyTime={totalStudyTime}
-                todayStudyTime={todayStudyTime}
-                studySessions={studySessions}
-                formatTime={formatTime}
+        {/* メインコンテンツ */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* 左カラム: タイマーとストリーク */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* ストリーク表示（ログイン時のみ） */}
+            {session && (
+              <StreakDisplay
+                streak={streak}
+                maxStreak={maxStreak}
+                studyTime={todayStudyTime}
+                level={level}
+                exp={exp}
+                maxExp={maxExp}
               />
-            </div>
-          </div>
-        </div>
+            )}
 
-        {/* フッター */}
-        <div className="mt-12 text-center text-gray-500 dark:text-gray-400">
-          <p className="text-sm">
-            頑張って応用情報技術者試験に合格しましょう！ 🎯
-          </p>
+            {/* 勉強タイマー */}
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center">
+                  <Clock className="w-6 h-6 mr-2 text-indigo-500" />
+                  勉強タイマー
+                </h2>
+                
+                <div className="text-6xl font-mono font-bold text-gray-800 mb-6">
+                  {formatTime(currentSession)}
+                </div>
+                
+                <div className="flex justify-center space-x-4">
+                  <button
+                    onClick={toggleStudying}
+                    className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors ${
+                      isStudying
+                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                        : 'bg-green-500 hover:bg-green-600 text-white'
+                    }`}
+                  >
+                    {isStudying ? (
+                      <>
+                        <Pause className="w-5 h-5" />
+                        <span>終了</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-5 h-5" />
+                        <span>開始</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* 今日の勉強時間 */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-5 h-5 text-blue-500" />
+                    <span className="font-medium text-gray-700">今日の勉強時間</span>
+                  </div>
+                  <span className="text-xl font-bold text-blue-600">
+                    {formatTime(todayStudyTime)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 統計情報 */}
+            <StudyStats 
+              studySessions={studySessions}
+              totalStudyTime={totalStudyTime}
+              todayStudyTime={todayStudyTime}
+              formatTime={formatTime}
+            />
+          </div>
+
+          {/* 右カラム: 過去問ポータル */}
+          <div className="space-y-6">
+            <StudyPortal />
+            
+            {/* 今日の目標 */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
+                今日の目標
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">勉強時間</span>
+                  <span className="font-medium">2時間</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-green-500 h-2 rounded-full transition-all duration-500"
+                    style={{ 
+                      width: `${Math.min((todayStudyTime / 7200) * 100, 100)}%` 
+                    }}
+                  />
+                </div>
+                <div className="text-sm text-gray-500 text-center">
+                  {Math.floor((todayStudyTime / 7200) * 100)}% 完了
+                </div>
+              </div>
+            </div>
+
+            {/* ログインを促すメッセージ（未ログイン時） */}
+            {!session && (
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl shadow-lg p-6">
+                <h3 className="text-xl font-bold mb-3">
+                  もっと楽しく勉強しませんか？
+                </h3>
+                <p className="text-indigo-100 mb-4">
+                  アカウントを作成すると、ストリーク機能や友達との進捗共有ができます！
+                </p>
+                <div className="space-y-2">
+                  <a
+                    href="/auth/signup"
+                    className="block w-full bg-white text-indigo-600 text-center py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    新規登録
+                  </a>
+                  <a
+                    href="/auth/signin"
+                    className="block w-full border border-white text-white text-center py-2 rounded-lg font-medium hover:bg-white hover:text-indigo-600 transition-colors"
+                  >
+                    ログイン
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

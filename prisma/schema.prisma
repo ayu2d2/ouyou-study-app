@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 学習データ
+  studyStreaks      StudyStreak[]
+  studySessions     StudySession[]
+  achievements      Achievement[]
+  
+  // 友達関係
+  sentFriendships     Friendship[] @relation("SentFriendships")
+  receivedFriendships Friendship[] @relation("ReceivedFriendships")
+}
+
+model StudyStreak {
+  id        String   @id @default(cuid())
+  userId    String
+  startDate DateTime
+  endDate   DateTime?
+  count     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StudySession {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime
+  duration  Int      // 秒単位
+  problems  Int      @default(0)
+  correct   Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // "streak", "study_time", "problems_solved"
+  title       String
+  description String
+  icon        String
+  unlockedAt  DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Friendship {
+  id        String   @id @default(cuid())
+  senderId  String
+  receiverId String
+  status    String   @default("pending") // "pending", "accepted", "declined"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  sender    User     @relation("SentFriendships", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver  User     @relation("ReceivedFriendships", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  @@unique([senderId, receiverId])
+}
