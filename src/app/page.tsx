@@ -6,7 +6,7 @@ import { useStudyTimer } from '@/hooks/useStudyTimer'
 import { StudyPortal } from '@/components/StudyPortal'
 import StreakDisplay from '@/components/StreakDisplay'
 import UserMenu from '@/components/UserMenu'
-import { Play, Pause, Calendar, Clock, TrendingUp } from 'lucide-react'
+import { Play, Pause, Calendar, Clock } from 'lucide-react'
 
 export default function HomePage() {
   const { data: session, status } = useSession()
@@ -24,11 +24,8 @@ export default function HomePage() {
   // デモ用のデータ（実際にはDBから取得）
   const [streak, setStreak] = useState(0)
   const [maxStreak, setMaxStreak] = useState(0)
-  const [level, setLevel] = useState(1)
-  const [exp, setExp] = useState(0)
-  const [maxExp, setMaxExp] = useState(100)
 
-  // 勉強時間からストリークとレベルを計算
+  // 勉強時間からストリークを計算
   useEffect(() => {
     if (session && studySessions.length > 0) {
       // 簡単なストリーク計算（連続勉強日数）
@@ -41,14 +38,6 @@ export default function HomePage() {
       const currentStreak = hasStudiedToday ? Math.floor(todayStudyTime / 1800) + 1 : 0 // 30分で1ストリーク
       setStreak(Math.min(currentStreak, 100))
       setMaxStreak(Math.max(maxStreak, currentStreak))
-      
-      // レベルとEXP計算（1時間で10EXP）
-      const totalExp = Math.floor(todayStudyTime / 360) // 6分で1EXP
-      const newLevel = Math.floor(totalExp / 100) + 1
-      const currentExp = totalExp % 100
-      
-      setLevel(newLevel)
-      setExp(currentExp)
     }
   }, [todayStudyTime, studySessions, session, maxStreak])
 
@@ -72,9 +61,7 @@ export default function HomePage() {
                   <span className="font-medium">{session.user.username}</span>
                   <span className="ml-1">でログイン中</span>
                 </div>
-                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                  🎯 レベル {level}
-                </div>
+
               </div>
             )}
           </div>
@@ -91,9 +78,6 @@ export default function HomePage() {
                 streak={streak}
                 maxStreak={maxStreak}
                 studyTime={todayStudyTime}
-                level={level}
-                exp={exp}
-                maxExp={maxExp}
               />
             )}
 
@@ -154,32 +138,9 @@ export default function HomePage() {
               onStudyStart={() => !isStudying && toggleStudying()}
               onStudyStop={() => isStudying && toggleStudying()}
               isStudying={isStudying}
+              currentSessionTime={currentSession}
+              formatTime={formatTime}
             />
-            
-            {/* 今日の目標 */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
-                今日の目標
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">勉強時間</span>
-                  <span className="font-medium">2時間</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-green-500 h-2 rounded-full transition-all duration-500"
-                    style={{ 
-                      width: `${Math.min((todayStudyTime / 7200) * 100, 100)}%` 
-                    }}
-                  />
-                </div>
-                <div className="text-sm text-gray-500 text-center">
-                  {Math.floor((todayStudyTime / 7200) * 100)}% 完了
-                </div>
-              </div>
-            </div>
 
             {/* ログインを促すメッセージ（未ログイン時） */}
             {!session && (

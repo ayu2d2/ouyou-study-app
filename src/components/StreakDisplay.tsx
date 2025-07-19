@@ -2,28 +2,20 @@
 
 import { useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
-import { Trophy, Flame, Users, Clock, TrendingUp, Target } from 'lucide-react'
+import { Trophy, Flame, Clock } from 'lucide-react'
 
 interface StreakDisplayProps {
   streak: number
   maxStreak: number
   studyTime: number
-  level: number
-  exp: number
-  maxExp: number
 }
 
-export default function StreakDisplay({ 
+function StreakDisplay({ 
   streak, 
   maxStreak, 
-  studyTime, 
-  level, 
-  exp, 
-  maxExp 
+  studyTime
 }: StreakDisplayProps) {
   const { data: session } = useSession()
-  
-  const expPercentage = (exp / maxExp) * 100
 
   // ストリークのレベル判定
   const getStreakLevel = (streak: number) => {
@@ -53,119 +45,45 @@ export default function StreakDisplay({
         </div>
       </div>
 
-      {/* ストリーク表示 */}
-      <motion.div 
-        className="text-center mb-8"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex items-center justify-center space-x-3 mb-4">
-          <Flame className={`w-12 h-12 ${streak > 0 ? 'text-orange-500' : 'text-gray-300'}`} />
-          <div>
-            <div className="text-4xl font-bold text-gray-800">{streak}</div>
-            <div className="text-sm text-gray-600">日連続</div>
-          </div>
-        </div>
-        
-        {streak > 0 && (
+      {/* ストリーク情報 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 現在のストリーク */}
+        <div className="text-center">
           <motion.div
-            className="text-center"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-red-500 text-white mb-3"
+            animate={{ scale: streak > 0 ? [1, 1.1, 1] : 1 }}
+            transition={{ duration: 0.5, repeat: streak > 0 ? Infinity : 0, repeatDelay: 2 }}
           >
-            <p className="text-green-600 font-medium">
-              🎉 素晴らしい！{streak}日連続で勉強中！
-            </p>
-            {streak >= 7 && (
-              <p className="text-blue-600 text-sm mt-1">
-                継続は力なり！この調子で頑張りましょう！
-              </p>
-            )}
+            <Flame className="w-12 h-12" />
           </motion.div>
-        )}
-      </motion.div>
+          <div className="text-3xl font-bold text-gray-800">{streak}</div>
+          <div className="text-sm text-gray-600">連続記録</div>
+        </div>
 
-      {/* レベルとEXP */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Trophy className="w-5 h-5 text-yellow-500" />
-            <span className="text-lg font-semibold text-gray-800">レベル {level}</span>
+        {/* 最高ストリーク */}
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white mb-3">
+            <Trophy className="w-12 h-12" />
           </div>
-          <span className="text-sm text-gray-600">{exp}/{maxExp} EXP</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-3">
-          <motion.div
-            className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${expPercentage}%` }}
-            transition={{ duration: 1, ease: "easeOut" }}
-          />
+          <div className="text-3xl font-bold text-gray-800">{maxStreak}</div>
+          <div className="text-sm text-gray-600">最高記録</div>
         </div>
       </div>
 
-      {/* 統計情報 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="text-center p-3 bg-blue-50 rounded-lg">
-          <Clock className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-          <div className="text-lg font-bold text-blue-600">{Math.floor(studyTime / 3600)}h</div>
-          <div className="text-xs text-gray-600">今日の勉強時間</div>
-        </div>
-        
-        <div className="text-center p-3 bg-orange-50 rounded-lg">
-          <Flame className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-          <div className="text-lg font-bold text-orange-600">{streak}</div>
-          <div className="text-xs text-gray-600">現在のストリーク</div>
-        </div>
-        
-        <div className="text-center p-3 bg-green-50 rounded-lg">
-          <Trophy className="w-6 h-6 text-green-500 mx-auto mb-2" />
-          <div className="text-lg font-bold text-green-600">{maxStreak}</div>
-          <div className="text-xs text-gray-600">最高ストリーク</div>
-        </div>
-        
-        <div className="text-center p-3 bg-purple-50 rounded-lg">
-          <Target className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-          <div className="text-lg font-bold text-purple-600">{level}</div>
-          <div className="text-xs text-gray-600">レベル</div>
-        </div>
-      </div>
-
-      {/* 次の目標 */}
-      <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
-          <TrendingUp className="w-5 h-5 mr-2 text-blue-500" />
-          次の目標
-        </h3>
-        <div className="space-y-2 text-sm">
-          {streak < 7 && (
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span>7日連続勉強でブロンズバッジ獲得！ (あと{7 - streak}日)</span>
+      {/* 今日の勉強時間 */}
+      <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+        <div className="flex items-center justify-center space-x-3">
+          <Clock className="w-6 h-6 text-blue-500" />
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">
+              {Math.floor(studyTime / 3600)}:{Math.floor((studyTime % 3600) / 60).toString().padStart(2, '0')}:{(studyTime % 60).toString().padStart(2, '0')}
             </div>
-          )}
-          {streak >= 7 && streak < 14 && (
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              <span>14日連続勉強でシルバーバッジ獲得！ (あと{14 - streak}日)</span>
-            </div>
-          )}
-          {streak >= 14 && streak < 30 && (
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span>30日連続勉強でゴールドバッジ獲得！ (あと{30 - streak}日)</span>
-            </div>
-          )}
-          {level < 10 && (
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>レベル{level + 1}まであと{maxExp - exp} EXP</span>
-            </div>
-          )}
+            <div className="text-sm text-blue-500">今日の勉強時間</div>
+          </div>
         </div>
       </div>
     </div>
   )
 }
+
+export default StreakDisplay

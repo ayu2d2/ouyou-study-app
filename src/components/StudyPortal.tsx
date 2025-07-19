@@ -7,9 +7,11 @@ interface StudyPortalProps {
   onStudyStart?: () => void
   onStudyStop?: () => void
   isStudying?: boolean
+  currentSessionTime?: number
+  formatTime?: (seconds: number) => string
 }
 
-export const StudyPortal = ({ onStudyStart, onStudyStop, isStudying }: StudyPortalProps) => {
+export const StudyPortal = ({ onStudyStart, onStudyStop, isStudying, currentSessionTime = 0, formatTime }: StudyPortalProps) => {
   const [showIframe, setShowIframe] = useState(false)
   const [currentUrl, setCurrentUrl] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -156,6 +158,14 @@ export const StudyPortal = ({ onStudyStart, onStudyStop, isStudying }: StudyPort
                 <Globe className="w-5 h-5 text-gray-600" />
                 <span className="font-medium text-gray-700">AP試験学習サイト</span>
                 <span className="text-sm text-gray-500 hidden sm:inline">- 応用情報技術者試験</span>
+                {/* タイマー表示 */}
+                {isStudying && formatTime && (
+                  <div className="flex items-center space-x-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm ml-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="font-mono font-semibold">{formatTime(currentSessionTime)}</span>
+                    <span className="hidden sm:inline">勉強中</span>
+                  </div>
+                )}
               </div>
               <div className="flex items-center space-x-1">
                 <button
