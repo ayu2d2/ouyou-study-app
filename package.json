@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:reset": "prisma migrate reset",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "next": "15.4.2",
@@ -15,7 +19,9 @@
     "lucide-react": "^0.460.0",
     "framer-motion": "^11.11.17",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^2.5.4"
+    "tailwind-merge": "^2.5.4",
+    "@prisma/client": "^6.0.0",
+    "@vercel/postgres": "^0.10.0"
   },
   "devDependencies": {
     "typescript": "^5",
@@ -26,6 +32,7 @@
     "postcss": "^8.4.47",
     "autoprefixer": "^10.4.20",
     "eslint": "^9",
-    "eslint-config-next": "15.4.2"
+    "eslint-config-next": "15.4.2",
+    "prisma": "^6.0.0"
   }
 }
