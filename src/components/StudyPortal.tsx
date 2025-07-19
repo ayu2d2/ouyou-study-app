@@ -3,7 +3,13 @@
 import { useState } from 'react'
 import { ExternalLink, Globe, BookOpen, X, Maximize2, Minimize2 } from 'lucide-react'
 
-export const StudyPortal = () => {
+interface StudyPortalProps {
+  onStudyStart?: () => void
+  onStudyStop?: () => void
+  isStudying?: boolean
+}
+
+export const StudyPortal = ({ onStudyStart, onStudyStop, isStudying }: StudyPortalProps) => {
   const [showIframe, setShowIframe] = useState(false)
   const [currentUrl, setCurrentUrl] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -47,6 +53,8 @@ export const StudyPortal = () => {
     if (embedSupported) {
       setCurrentUrl(url)
       setShowIframe(true)
+      // 過去問道場を開いたら自動でタイマー開始
+      onStudyStart?.()
     } else {
       window.open(url, '_blank')
     }
@@ -56,6 +64,8 @@ export const StudyPortal = () => {
     setShowIframe(false)
     setIsFullscreen(false)
     setCurrentUrl('')
+    // 過去問道場を閉じたら自動でタイマー停止
+    onStudyStop?.()
   }
 
   const toggleFullscreen = () => {
@@ -78,11 +88,21 @@ export const StudyPortal = () => {
         {/* 学習ポータルヘッダー */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <h2 className="text-xl font-semibold flex items-center">
-              <BookOpen className="mr-2" />
-              学習ポータル
-            </h2>
-            <p className="text-blue-100 text-sm mt-1">効率的な学習のためのリソース</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold flex items-center">
+                  <BookOpen className="mr-2" />
+                  学習ポータル
+                </h2>
+                <p className="text-blue-100 text-sm mt-1">効率的な学習のためのリソース</p>
+              </div>
+              {isStudying && (
+                <div className="flex items-center bg-white/20 px-3 py-1 rounded-full">
+                  <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                  <span className="text-sm font-medium">勉強中</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 学習リンク集 */}
@@ -110,14 +130,14 @@ export const StudyPortal = () => {
           </div>
         </div>
 
-        {/* 学習のコツ */}
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-xl border border-yellow-200">
-          <h3 className="text-lg font-semibold text-yellow-800 mb-3">📝 効率的な学習のコツ</h3>
-          <ul className="space-y-2 text-yellow-700 text-sm">
-            <li>• 学習開始前に必ずタイマーを開始しましょう</li>
-            <li>• 25分学習 + 5分休憩のポモドーロテクニックがおすすめ</li>
-            <li>• 間違えた問題は必ず解説を読んで理解しましょう</li>
-            <li>• 毎日継続することが最も重要です</li>
+        {/* 自動タイマーの説明 */}
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl border border-green-200">
+          <h3 className="text-lg font-semibold text-green-800 mb-3">⏱️ 自動タイマー機能</h3>
+          <ul className="space-y-2 text-green-700 text-sm">
+            <li>• 過去問道場を開くと自動でタイマーが開始されます</li>
+            <li>• 学習画面を閉じると自動でタイマーが停止します</li>
+            <li>• 手動でのタイマー操作は不要！集中して学習しましょう</li>
+            <li>• 連続記録（ストリーク）を伸ばして継続学習の習慣を身につけよう</li>
           </ul>
         </div>
       </div>

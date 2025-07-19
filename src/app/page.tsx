@@ -3,18 +3,16 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useStudyTimer } from '@/hooks/useStudyTimer'
-import { StudyStats } from '@/components/StudyStats'
 import { StudyPortal } from '@/components/StudyPortal'
 import StreakDisplay from '@/components/StreakDisplay'
 import UserMenu from '@/components/UserMenu'
-import { Play, Pause, Square, Calendar, Clock, TrendingUp } from 'lucide-react'
+import { Play, Pause, Calendar, Clock, TrendingUp } from 'lucide-react'
 
 export default function HomePage() {
   const { data: session, status } = useSession()
   const {
     isStudying,
     currentSession,
-    totalStudyTime,
     todayStudyTime,
     toggleStudying,
     formatTime,
@@ -86,7 +84,8 @@ export default function HomePage() {
         {/* メインコンテンツ */}
         <div className="grid lg:grid-cols-3 gap-6">
           {/* 左カラム: タイマーとストリーク */}
-          <div className="lg:col-span-2 space-y-6">{/* ストリーク表示（ログイン時のみ） */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* ストリーク表示（ログイン時のみ） */}
             {session && (
               <StreakDisplay
                 streak={streak}
@@ -147,19 +146,15 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-
-            {/* 統計情報 */}
-            <StudyStats 
-              studySessions={studySessions}
-              totalStudyTime={totalStudyTime}
-              todayStudyTime={todayStudyTime}
-              formatTime={formatTime}
-            />
           </div>
 
           {/* 右カラム: 過去問ポータル */}
           <div className="space-y-6">
-            <StudyPortal />
+            <StudyPortal 
+              onStudyStart={() => !isStudying && toggleStudying()}
+              onStudyStop={() => isStudying && toggleStudying()}
+              isStudying={isStudying}
+            />
             
             {/* 今日の目標 */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
