@@ -16,6 +16,16 @@ export const StudyPortal = ({ onStudyStart, onStudyStop, isStudying, currentSess
   const [currentUrl, setCurrentUrl] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(false)
 
+  // formatTime関数のデフォルト実装
+  const defaultFormatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const safeFormatTime = formatTime || defaultFormatTime
+
   const studyLinks = [
     {
       title: '過去問道場',
@@ -159,10 +169,10 @@ export const StudyPortal = ({ onStudyStart, onStudyStop, isStudying, currentSess
                 <span className="font-medium text-gray-700">AP試験学習サイト</span>
                 <span className="text-sm text-gray-500 hidden sm:inline">- 応用情報技術者試験</span>
                 {/* タイマー表示 */}
-                {isStudying && formatTime && (
+                {isStudying && (
                   <div className="flex items-center space-x-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm ml-3">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="font-mono font-semibold">{formatTime(currentSessionTime)}</span>
+                    <span className="font-mono font-semibold">{safeFormatTime(currentSessionTime)}</span>
                     <span className="hidden sm:inline">勉強中</span>
                   </div>
                 )}

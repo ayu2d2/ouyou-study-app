@@ -13,6 +13,9 @@ interface StudyData {
   }>
 }
 
+// 最小学習時間（秒）- この時間以上勉強するとストリークカウント
+const MIN_STUDY_TIME_FOR_STREAK = 600 // 10分
+
 export const useStudyTimer = () => {
   const [isStudying, setIsStudying] = useState(false)
   const [currentSession, setCurrentSession] = useState(0)
@@ -85,6 +88,18 @@ export const useStudyTimer = () => {
         }
         
         saveData(newData)
+        
+        // ストリーク判定のためのイベントを発行
+        // 10分以上勉強した場合のみストリークカウント
+        if (currentSession >= MIN_STUDY_TIME_FOR_STREAK) {
+          const event = new CustomEvent('studyCompleted', { 
+            detail: { 
+              duration: currentSession,
+              todayTotal: newData.todayStudyTime 
+            } 
+          })
+          window.dispatchEvent(event)
+        }
       }
       setCurrentSession(0)
     }

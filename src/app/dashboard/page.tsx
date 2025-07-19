@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useStudyTimer } from '@/hooks/useStudyTimer'
+import { useStreak } from '@/hooks/useStreak'
 import { StudyPortal } from '@/components/StudyPortal'
 import UserMenu from '@/components/UserMenu'
 import Ranking from '@/components/Ranking'
-import { Clock, Users } from 'lucide-react'
+import { Clock, Users, Trophy } from 'lucide-react'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -20,6 +21,12 @@ export default function DashboardPage() {
     formatTime,
     studySessions
   } = useStudyTimer()
+  
+  const {
+    currentStreak,
+    maxStreak,
+    hasStudiedToday
+  } = useStreak()
 
   // 未ログインの場合はトップページにリダイレクト
   useEffect(() => {
@@ -28,36 +35,6 @@ export default function DashboardPage() {
     //   router.push('/')
     // }
   }, [session, status, router])
-
-  // デモ用のデータ（実際にはDBから取得）
-  const [streak, setStreak] = useState(0)
-  const [maxStreak, setMaxStreak] = useState(0)
-
-  // ユーザーデータを取得
-  useEffect(() => {
-    if (session?.user?.email) {
-      // 実際のDBからユーザーデータを取得する処理をここに追加
-      // 今はデモ用のダミーデータ
-      setStreak(7)
-      setMaxStreak(15)
-    }
-  }, [session])
-
-  // 勉強時間からストリークを計算
-  useEffect(() => {
-    if (session && studySessions.length > 0) {
-      // 簡単なストリーク計算（連続勉強日数）
-      const today = new Date().toDateString()
-      const hasStudiedToday = studySessions.some(session => 
-        new Date(session.date).toDateString() === today
-      )
-      
-      // 実際にはDBから取得するが、デモ用に計算
-      const currentStreak = hasStudiedToday ? Math.floor(todayStudyTime / 1800) + 1 : 0 // 30分で1ストリーク
-      setStreak(Math.min(currentStreak, 100))
-      setMaxStreak(Math.max(maxStreak, currentStreak))
-    }
-  }, [todayStudyTime, studySessions, session, maxStreak])
 
   // ローディング中
   if (status === 'loading') {
@@ -107,7 +84,7 @@ export default function DashboardPage() {
                   <span className="text-white text-xs">🔥</span>
                 </div>
                 <div className="text-sm font-semibold">
-                  {streak}日連続
+                  {currentStreak}日連続
                 </div>
               </div>
             </div>
@@ -151,6 +128,48 @@ export default function DashboardPage() {
                 ) : (
                   <div className="text-gray-500 text-xs text-center px-2">
                     過去問道場を開くと自動でタイマーが開始されます
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ストリーク情報 */}
+            <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl shadow-lg p-4">
+              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                <Trophy className="w-5 h-5 mr-2 text-orange-500" />
+                学習ストリーク
+              </h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600 mb-1">
+                    {currentStreak}
+                  </div>
+                  <div className="text-sm text-gray-600">現在のストリーク</div>
+                  <div className="text-xs text-gray-500">連続学習日数</div>
+                </div>
+                
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600 mb-1">
+                    {maxStreak}
+                  </div>
+                  <div className="text-sm text-gray-600">最大ストリーク</div>
+                  <div className="text-xs text-gray-500">過去最高記録</div>
+                </div>
+              </div>
+              
+              <div className="mt-3 text-center">
+                {hasStudiedToday ? (
+                  <div className="flex items-center justify-center space-x-2 text-green-600 text-sm">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>今日の学習完了！</span>
+                  </div>
+                ) : (
+                  <div className="text-orange-600 text-sm">
+                    今日はまだ学習していません
+                    <div className="text-xs text-gray-500 mt-1">
+                      10分以上の学習でストリークカウント
+                    </div>
                   </div>
                 )}
               </div>

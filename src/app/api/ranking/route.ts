@@ -36,7 +36,7 @@ export async function GET(request: Request) {
           studyTime: userStudyTime 
         },
         // フレンドの学習時間を追加（ダミーデータとして今日の学習時間を生成）
-        ...friends.map((friend: any) => ({
+        ...friends.map((friend: { id: string; username: string }) => ({
           id: friend.id,
           username: friend.username,
           studyTime: Math.floor(Math.random() * 7200) + 600 // 10分-2時間のランダム

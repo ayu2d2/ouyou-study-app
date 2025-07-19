@@ -37,7 +37,8 @@ export default function HomePage() {
       } else if (result?.ok) {
         router.push('/dashboard')
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Login error:', error)
       setError('ログイン中にエラーが発生しました')
     } finally {
       setIsLoading(false)
