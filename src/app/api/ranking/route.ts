@@ -14,17 +14,57 @@ export async function GET(request: Request) {
     const category = searchParams.get('category') || 'studyTime'
     const currentStudyTime = parseInt(searchParams.get('currentStudyTime') || '0')
     
-    // フレンドデータを取得
-    const friendsResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3001'}/api/friends`, {
-      headers: {
-        'Cookie': request.headers.get('cookie') || ''
-      }
-    })
-
+    // フレンドデータを取得（Prismaで直接取得）
     let friends = []
-    if (friendsResponse.ok) {
-      const friendsData = await friendsResponse.json()
-      friends = friendsData.friends || []
+    try {
+      const { PrismaClient } = require('@prisma/client')
+      const prisma = new PrismaClient()
+      
+      const friendships = await prisma.friendship.findMany({
+        where: {
+          AND: [
+            {
+              OR: [
+                { senderId: session.user.id },
+                { receiverId: session.user.id }
+              ]
+            },
+            { status: 'accepted' }
+          ]
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              username: true,
+              totalStudyTime: true
+            }
+          },
+          receiver: {
+            select: {
+              id: true,
+              username: true,
+              totalStudyTime: true
+            }
+          }
+        }
+      })
+
+      friends = friendships.map((friendship: any) => {
+        const friend = friendship.senderId === session.user.id 
+          ? friendship.receiver 
+          : friendship.sender
+        return {
+          id: friend.id,
+          username: friend.username,
+          totalStudyTime: friend.totalStudyTime
+        }
+      })
+      
+      await prisma.$disconnect()
+    } catch (error) {
+      console.error('フレンド取得エラー:', error)
+      friends = []
     }
 
     // 実際のユーザーとフレンドを含むランキングを作成
@@ -35,11 +75,11 @@ export async function GET(request: Request) {
           username: session.user.username || 'あなた', 
           studyTime: userStudyTime 
         },
-        // フレンドの学習時間を追加（ダミーデータとして今日の学習時間を生成）
-        ...friends.map((friend: { id: string; username: string }) => ({
+        // フレンドの学習時間を追加（実際のデータまたはダミーデータとして今日の学習時間を生成）
+        ...friends.map((friend: { id: string; username: string; totalStudyTime?: number }) => ({
           id: friend.id,
           username: friend.username,
-          studyTime: Math.floor(Math.random() * 7200) + 600 // 10分-2時間のランダム
+          studyTime: friend.totalStudyTime || Math.floor(Math.random() * 7200) + 600 // 実際の学習時間またはランダム
         }))
       ]
 
