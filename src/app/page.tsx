@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession, signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
   Flame, BookOpen, Users, TrendingUp, 
-  Bell, Play, Target, Award, Clock, StopCircle
+  Bell, Play, Target, Award, Clock, StopCircle, LogOut, User
 } from 'lucide-react'
 import { cn, formatDuration } from '@/lib/utils'
 import { registerPushNotification } from '@/lib/notifications'
@@ -41,8 +43,18 @@ interface StudySession {
 }
 
 export default function HomePage() {
-  // 現在のユーザーID（仮）
-  const [currentUserId] = useState('demo-user')
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  
+  // 認証チェック
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+    }
+  }, [status, router])
+  
+  // 現在のユーザーID
+  const currentUserId = session?.user?.id || 'demo-user'
   
   const [stats, setStats] = useState<StudyStats>({
     totalStudyTime: 0,
@@ -58,6 +70,7 @@ export default function HomePage() {
   const [isStudying, setIsStudying] = useState(false)
   const [currentSession, setCurrentSession] = useState<StudySession | null>(null)
   const [studyStartTime, setStudyStartTime] = useState<Date | null>(null)
+  const [elapsedTime, setElapsedTime] = useState(0) // リアルタイム学習時間（秒）
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -68,9 +81,32 @@ export default function HomePage() {
     }
     
     // 初期データの読み込み
-    loadStudyStats()
-    loadFriends()
+    if (currentUserId && currentUserId !== 'demo-user') {
+      loadStudyStats()
+      loadFriends()
+    }
   }, [currentUserId])
+
+  // 学習時間のリアルタイム更新
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+    
+    if (isStudying && studyStartTime) {
+      interval = setInterval(() => {
+        const now = Date.now()
+        const elapsed = Math.floor((now - studyStartTime.getTime()) / 1000)
+        setElapsedTime(elapsed)
+      }, 1000)
+    } else {
+      setElapsedTime(0)
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
+  }, [isStudying, studyStartTime])
 
   // 学習統計を読み込む
   const loadStudyStats = async () => {
@@ -117,6 +153,15 @@ export default function HomePage() {
         setCurrentSession(session)
         setIsStudying(true)
         setStudyStartTime(new Date())
+        setElapsedTime(0)
+        
+        // 学習開始の通知
+        if (notificationsEnabled) {
+          new Notification('学習開始！', {
+            body: '今日も頑張りましょう！',
+            icon: '/icon-192x192.png'
+          })
+        }
       }
     } catch (error) {
       console.error('Failed to start study session:', error)
@@ -127,9 +172,9 @@ export default function HomePage() {
   const handleStopStudy = async () => {
     if (!currentSession || !studyStartTime) return
     
-    const duration = Math.floor((Date.now() - studyStartTime.getTime()) / 1000 / 60)
+    const duration = Math.floor((Date.now() - studyStartTime.getTime()) / 1000 / 60) // 分単位
     const questions = Math.floor(Math.random() * 10) + 5 // デモ用ランダム
-    const correct = Math.floor(questions * 0.7) // デモ用70%正解
+    const correct = Math.floor(questions * (0.6 + Math.random() * 0.3)) // デモ用60-90%正解
     
     try {
       const response = await fetch('/api/study', {
@@ -147,8 +192,19 @@ export default function HomePage() {
         setIsStudying(false)
         setCurrentSession(null)
         setStudyStartTime(null)
+        setElapsedTime(0)
+        
+        // 学習終了の通知
+        if (notificationsEnabled && duration > 0) {
+          new Notification('学習完了！', {
+            body: `${duration}分間お疲れ様でした！${questions}問中${correct}問正解です。`,
+            icon: '/icon-192x192.png'
+          })
+        }
+        
         // 統計を再読み込み
         loadStudyStats()
+        loadFriends()
       }
     } catch (error) {
       console.error('Failed to end study session:', error)
@@ -185,6 +241,25 @@ export default function HomePage() {
     }
   }
 
+  // 認証ローディング中の表示
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
+            <BookOpen className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 未認証の場合は何も表示しない（リダイレクト中）
+  if (status === 'unauthenticated') {
+    return null
+  }
+
   return (
     <motion.div 
       className="container mx-auto px-4 py-8 max-w-6xl"
@@ -195,6 +270,31 @@ export default function HomePage() {
       {/* ヘッダー */}
       <motion.header className="text-center mb-8" variants={itemVariants}>
         <div className="relative">
+          {/* ユーザー情報とログアウト */}
+          <div className="absolute top-0 right-0 flex items-center gap-4">
+            <div className="flex items-center gap-2 text-gray-600">
+              {session?.user?.image ? (
+                <img 
+                  src={session.user.image} 
+                  alt="プロフィール"
+                  className="w-8 h-8 rounded-full"
+                />
+              ) : (
+                <User className="w-8 h-8 text-gray-400" />
+              )}
+              <span className="text-sm font-medium">
+                {session?.user?.name || session?.user?.email || 'ユーザー'}
+              </span>
+            </div>
+            <button
+              onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+              className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm"
+            >
+              <LogOut className="w-4 h-4" />
+              ログアウト
+            </button>
+          </div>
+          
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
             応用情報技術者試験
           </h1>
@@ -290,9 +390,23 @@ export default function HomePage() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
           >
-            <div className="flex items-center text-green-800">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse"></div>
-              学習中... 頑張って！
+            <div className="flex items-center justify-between">
+              <div className="flex items-center text-green-800">
+                <div className="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse"></div>
+                学習中... 頑張って！
+              </div>
+              <div className="text-green-700 font-mono text-lg">
+                {Math.floor(elapsedTime / 60)}:{String(elapsedTime % 60).padStart(2, '0')}
+              </div>
+            </div>
+            <div className="mt-2 w-full bg-green-200 rounded-full h-2">
+              <div 
+                className="bg-green-500 h-2 rounded-full transition-all duration-1000"
+                style={{ width: `${Math.min((elapsedTime / 1800) * 100, 100)}%` }} // 30分で100%
+              />
+            </div>
+            <div className="text-xs text-green-600 mt-1">
+              目標: 30分 ({Math.floor((elapsedTime / 1800) * 100)}%)
             </div>
           </motion.div>
         )}
