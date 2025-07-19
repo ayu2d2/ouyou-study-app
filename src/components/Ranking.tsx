@@ -24,7 +24,7 @@ interface RankingData {
   total: number
 }
 
-export default function Ranking() {
+export default function Ranking({ currentStudyTime = 0 }: { currentStudyTime?: number }) {
   const { data: session } = useSession()
   const [rankingData, setRankingData] = useState<RankingData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -34,8 +34,9 @@ export default function Ranking() {
   const loadRanking = useCallback(async () => {
     try {
       setLoading(true)
+      // 現在の学習時間をクエリパラメータとして送信
       const response = await fetch(
-        `/api/ranking?type=${selectedType}&category=studyTime&limit=50`
+        `/api/ranking?type=${selectedType}&category=studyTime&limit=50&currentStudyTime=${currentStudyTime}`
       )
       
       if (response.ok) {
@@ -52,7 +53,7 @@ export default function Ranking() {
     } finally {
       setLoading(false)
     }
-  }, [selectedType])
+  }, [selectedType, currentStudyTime]) // currentStudyTime を依存配列に追加
 
   useEffect(() => {
     if (session) {
@@ -145,6 +146,14 @@ export default function Ranking() {
             <BarChart3 className="w-4 h-4" />
           </button>
         </div>
+      </div>
+
+      {/* ランキングの説明 */}
+      <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+        <p className="text-sm text-blue-700">
+          <strong>フレンドランキング:</strong> あなたとフレンドの学習時間を比較しています。
+          フレンドを追加して、みんなで一緒に学習を頑張りましょう！
+        </p>
       </div>
 
       {/* 期間選択 */}

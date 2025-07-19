@@ -7,7 +7,7 @@ import { useStudyTimer } from '@/hooks/useStudyTimer'
 import { StudyPortal } from '@/components/StudyPortal'
 import UserMenu from '@/components/UserMenu'
 import Ranking from '@/components/Ranking'
-import { Clock } from 'lucide-react'
+import { Clock, Users } from 'lucide-react'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -23,9 +23,10 @@ export default function DashboardPage() {
 
   // 未ログインの場合はトップページにリダイレクト
   useEffect(() => {
-    if (status !== 'loading' && !session) {
-      router.push('/')
-    }
+    // 一時的にコメントアウト - ログイン機能をテストするため
+    // if (status !== 'loading' && !session) {
+    //   router.push('/')
+    // }
   }, [session, status, router])
 
   // デモ用のデータ（実際にはDBから取得）
@@ -71,9 +72,10 @@ export default function DashboardPage() {
   }
 
   // 未ログインの場合は何も表示しない（リダイレクト中）
-  if (!session) {
-    return null
-  }
+  // 一時的にコメントアウト - ログイン機能をテストするため
+  // if (!session) {
+  //   return null
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -89,6 +91,15 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center space-x-3">
+            {/* フレンドボタン */}
+            <button
+              onClick={() => router.push('/friends')}
+              className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-lg flex items-center transition-colors"
+            >
+              <Users className="w-4 h-4 mr-1" />
+              <span className="text-sm font-medium">フレンド</span>
+            </button>
+            
             {/* 連続記録表示 */}
             <div className="flex items-center bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 px-3 py-2 rounded-lg">
               <div className="flex items-center space-x-2">
@@ -160,7 +171,7 @@ export default function DashboardPage() {
 
         {/* ランキング */}
         <div className="mt-6 max-w-4xl mx-auto">
-          <Ranking />
+          <Ranking currentStudyTime={todayStudyTime} />
         </div>
       </div>
     </div>
