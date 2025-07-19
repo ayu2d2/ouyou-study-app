@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-simple'
+import { PrismaClient } from '@prisma/client'
 
 export async function GET(request: Request) {
   try {
@@ -15,9 +16,8 @@ export async function GET(request: Request) {
     const currentStudyTime = parseInt(searchParams.get('currentStudyTime') || '0')
     
     // フレンドデータを取得（Prismaで直接取得）
-    let friends = []
+    let friends: { id: string; username: string; totalStudyTime: number }[] = []
     try {
-      const { PrismaClient } = require('@prisma/client')
       const prisma = new PrismaClient()
       
       const friendships = await prisma.friendship.findMany({
@@ -50,7 +50,12 @@ export async function GET(request: Request) {
         }
       })
 
-      friends = friendships.map((friendship: any) => {
+      friends = friendships.map((friendship: {
+        senderId: string;
+        receiverId: string;
+        sender: { id: string; username: string; totalStudyTime: number };
+        receiver: { id: string; username: string; totalStudyTime: number };
+      }) => {
         const friend = friendship.senderId === session.user.id 
           ? friendship.receiver 
           : friendship.sender
@@ -76,7 +81,7 @@ export async function GET(request: Request) {
           studyTime: userStudyTime 
         },
         // フレンドの学習時間を追加（実際のデータまたはダミーデータとして今日の学習時間を生成）
-        ...friends.map((friend: { id: string; username: string; totalStudyTime?: number }) => ({
+        ...friends.map((friend: { id: string; username: string; totalStudyTime: number }) => ({
           id: friend.id,
           username: friend.username,
           studyTime: friend.totalStudyTime || Math.floor(Math.random() * 7200) + 600 // 実際の学習時間またはランダム
