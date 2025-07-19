@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
-import { User, LogOut, Settings, UserPlus, Users } from 'lucide-react'
+import { User, LogOut, Settings, UserPlus, Users, BarChart3, Trophy } from 'lucide-react'
 import Link from 'next/link'
 
 interface UserMenuProps {
@@ -72,10 +72,6 @@ export default function UserMenu({ className = '' }: UserMenuProps) {
           <div className="font-medium text-gray-800 text-sm">
             {session.user.username}
           </div>
-          <div className="text-xs text-green-600 flex items-center">
-            <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></div>
-            ログイン中
-          </div>
         </div>
       </button>
 
@@ -88,34 +84,38 @@ export default function UserMenu({ className = '' }: UserMenuProps) {
             <p className="text-sm text-gray-500">
               {session.user.email}
             </p>
+            <div className="text-xs text-green-600 flex items-center mt-1">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></div>
+              ログイン中
+            </div>
           </div>
           
           <div className="py-2">
             <Link
-              href="/profile"
+              href="/progress"
               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               onClick={() => setIsOpen(false)}
             >
-              <Settings className="w-4 h-4 mr-3" />
-              プロフィール設定
+              <BarChart3 className="w-4 h-4 mr-3" />
+              学習進捗
             </Link>
-            
+
             <Link
               href="/friends"
               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               onClick={() => setIsOpen(false)}
             >
               <Users className="w-4 h-4 mr-3" />
-              友達リスト
+              フレンド
             </Link>
             
             <Link
-              href="/friends/add"
+              href="/settings"
               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               onClick={() => setIsOpen(false)}
             >
-              <UserPlus className="w-4 h-4 mr-3" />
-              友達を追加
+              <Settings className="w-4 h-4 mr-3" />
+              プロフィール設定
             </Link>
           </div>
           

@@ -18,10 +18,20 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // XPシステム
+  totalXP   Int      @default(0)
+  level     Int      @default(1)
+  
+  // 統計データ
+  totalStudyTime Int  @default(0) // 秒単位
+  totalProblems  Int  @default(0)
+  totalCorrect   Int  @default(0)
+
   // 学習データ
   studyStreaks      StudyStreak[]
   studySessions     StudySession[]
   achievements      Achievement[]
+  rankings          Ranking[]
   
   // 友達関係
   sentFriendships     Friendship[] @relation("SentFriendships")
@@ -76,4 +86,20 @@ model Friendship {
   receiver  User     @relation("ReceivedFriendships", fields: [receiverId], references: [id], onDelete: Cascade)
   
   @@unique([senderId, receiverId])
+}
+
+model Ranking {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "weekly", "monthly", "allTime"
+  category  String   // "studyTime", "xp", "problems"
+  rank      Int
+  score     Float
+  period    String   // "2024-W29", "2024-07", "all"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, type, category, period])
 }
