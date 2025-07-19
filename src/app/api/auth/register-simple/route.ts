@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,23 +22,49 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Vercel環境では簡単なデモ登録のみ
-    if (email === 'demo@example.com') {
-      return NextResponse.json(
-        { error: 'このメールアドレスは既に使用されています（デモ用）' },
-        { status: 400 }
-      )
+    // 既存ユーザーのチェック
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { username }
+        ]
+      }
+    })
+
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return NextResponse.json(
+          { error: 'このメールアドレスは既に使用されています' },
+          { status: 400 }
+        )
+      }
+      if (existingUser.username === username) {
+        return NextResponse.json(
+          { error: 'このユーザー名は既に使用されています' },
+          { status: 400 }
+        )
+      }
     }
 
-    // デモ用のレスポンス
-    return NextResponse.json({
-      message: 'デモ環境では登録機能は利用できません。ログインは demo@example.com / demo123 をお試しください。',
-      user: {
-        id: 'demo',
+    // パスワードをハッシュ化
+    const hashedPassword = await bcrypt.hash(password, 12)
+
+    // ユーザーを作成
+    const user = await prisma.user.create({
+      data: {
         email,
         username,
-        createdAt: new Date()
+        password: hashedPassword,
       }
+    })
+
+    // パスワードを除いてレスポンス
+    const { password: _, ...userWithoutPassword } = user
+
+    return NextResponse.json({
+      message: 'アカウントが正常に作成されました！ログインしてください。',
+      user: userWithoutPassword
     })
 
   } catch (error) {

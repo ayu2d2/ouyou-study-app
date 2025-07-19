@@ -1,7 +1,8 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
-// Vercel用の簡略化された認証設定
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -13,18 +14,42 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         console.log('認証試行:', credentials?.email)
         
-        // 開発環境での簡単な認証（本番では適切なDBを使用）
-        if (credentials?.email === 'demo@example.com' && credentials?.password === 'demo123') {
-          console.log('認証成功')
-          return {
-            id: '1',
-            email: 'demo@example.com',
-            username: 'Demo User',
-          }
+        if (!credentials?.email || !credentials?.password) {
+          console.log('認証失敗: 資格情報が不足')
+          return null
         }
-        
-        console.log('認証失敗')
-        return null
+
+        try {
+          // データベースからユーザーを検索
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email
+            }
+          })
+
+          if (!user) {
+            console.log('認証失敗: ユーザーが見つかりません')
+            return null
+          }
+
+          // パスワード検証
+          const isValidPassword = await bcrypt.compare(credentials.password, user.password)
+          
+          if (!isValidPassword) {
+            console.log('認証失敗: パスワードが間違っています')
+            return null
+          }
+
+          console.log('認証成功:', user.email)
+          return {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+          }
+        } catch (error) {
+          console.error('認証エラー:', error)
+          return null
+        }
       }
     })
   ],
