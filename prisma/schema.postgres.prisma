@@ -1,0 +1,109 @@
+// This is your Prisma schema file for production (PostgreSQL),
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 学習関連の統計
+  totalXP         Int @default(0)
+  level           Int @default(1)
+  totalStudyTime  Int @default(0) // 分単位
+  totalProblems   Int @default(0)
+  totalCorrect    Int @default(0)
+
+  // リレーション
+  sentFriendships     Friendship[] @relation("FriendshipSender")
+  receivedFriendships Friendship[] @relation("FriendshipReceiver")
+  studies             Study[]
+  answers             Answer[]
+  streaks             Streak[]
+
+  @@map("users")
+}
+
+model Friendship {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  status     String   @default("pending") // pending, accepted, declined
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  sender   User @relation("FriendshipSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("FriendshipReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("friendships")
+}
+
+model Study {
+  id        String   @id @default(cuid())
+  userId    String
+  duration  Int      // 学習時間（分）
+  xpGained  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("studies")
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  options     String   // JSON形式で選択肢を保存
+  correctAnswer String
+  explanation String   // 解説
+  category    String   // カテゴリ
+  difficulty  String   // 難易度
+  year        Int      // 出題年
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  answers Answer[]
+
+  @@map("questions")
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  userAnswer String
+  isCorrect  Boolean
+  timeSpent  Int      // 回答にかかった時間（秒）
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("answers")
+}
+
+model Streak {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  studyTime Int      // その日の学習時間（分）
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("streaks")
+}

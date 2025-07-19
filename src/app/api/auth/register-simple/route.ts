@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/safe-prisma'
 import bcrypt from 'bcryptjs'
 
 // API Route内でPrismaクライアントを直接初期化
-const prisma = new PrismaClient()
+// Using shared prisma instance from safe-prisma
 
 export async function POST(request: NextRequest) {
   try {
