@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
-import { User, LogOut, Settings, UserPlus, Users, BarChart3, Trophy } from 'lucide-react'
+import { User, LogOut, Settings, Users, BarChart3 } from 'lucide-react'
 import Link from 'next/link'
 
 interface UserMenuProps {

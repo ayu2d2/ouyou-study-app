@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { Trophy, Medal, Crown, Clock, List, BarChart3 } from 'lucide-react'
 
@@ -31,13 +31,7 @@ export default function Ranking() {
   const [selectedType, setSelectedType] = useState<'today' | 'weekly' | 'monthly' | 'allTime'>('today')
   const [viewMode, setViewMode] = useState<'list' | 'chart'>('list')
 
-  useEffect(() => {
-    if (session) {
-      loadRanking()
-    }
-  }, [session, selectedType])
-
-  const loadRanking = async () => {
+  const loadRanking = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(
@@ -46,61 +40,22 @@ export default function Ranking() {
       
       if (response.ok) {
         const data = await response.json()
-        setRankingData(data)
+        setRankingData(data.ranking || [])
       } else {
-        console.error('Failed to load ranking')
-        // デモ用のダミーデータ
-        setRankingData({
-          ranking: [
-            {
-              rank: 1,
-              user: { id: '1', username: '田中太郎', totalStudyTime: selectedType === 'today' ? 3600 : 7200 },
-              score: selectedType === 'today' ? 3600 : 7200,
-              isMe: false
-            },
-            {
-              rank: 2,
-              user: { id: '2', username: '佐藤花子', totalStudyTime: selectedType === 'today' ? 2700 : 6300 },
-              score: selectedType === 'today' ? 2700 : 6300,
-              isMe: false
-            },
-            {
-              rank: 3,
-              user: { id: '3', username: session?.user?.username || 'あなた', totalStudyTime: selectedType === 'today' ? 1800 : 5400 },
-              score: selectedType === 'today' ? 1800 : 5400,
-              isMe: true
-            },
-            {
-              rank: 4,
-              user: { id: '4', username: '山田次郎', totalStudyTime: selectedType === 'today' ? 1200 : 4500 },
-              score: selectedType === 'today' ? 1200 : 4500,
-              isMe: false
-            },
-            {
-              rank: 5,
-              user: { id: '5', username: '鈴木美咲', totalStudyTime: selectedType === 'today' ? 900 : 3600 },
-              score: selectedType === 'today' ? 900 : 3600,
-              isMe: false
-            }
-          ],
-          myRank: {
-            rank: 3,
-            user: { id: '3', username: session?.user?.username || 'あなた', totalStudyTime: selectedType === 'today' ? 1800 : 5400 },
-            score: selectedType === 'today' ? 1800 : 5400,
-            isMe: true
-          },
-          type: selectedType,
-          category: 'studyTime',
-          period: selectedType,
-          total: selectedType === 'today' ? 15 : 10
-        })
+        console.error('ランキング取得失敗:', await response.text())
       }
     } catch (error) {
-      console.error('Error loading ranking:', error)
+      console.error('ランキング取得エラー:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedType])
+
+  useEffect(() => {
+    if (session) {
+      loadRanking()
+    }
+  }, [session, loadRanking])
 
   const getRankIcon = (rank: number) => {
     switch (rank) {

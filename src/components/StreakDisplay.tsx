@@ -20,18 +20,6 @@ function StreakDisplay({
 }: StreakDisplayProps) {
   const { data: session } = useSession()
 
-  // ストリークのレベル判定
-  const getStreakLevel = (streak: number) => {
-    if (streak >= 100) return { name: '伝説', color: 'from-purple-500 to-pink-500', emoji: '👑' }
-    if (streak >= 50) return { name: 'マスター', color: 'from-yellow-400 to-orange-500', emoji: '🔥' }
-    if (streak >= 30) return { name: 'エキスパート', color: 'from-blue-500 to-purple-500', emoji: '⭐' }
-    if (streak >= 14) return { name: 'プロ', color: 'from-green-400 to-blue-500', emoji: '💎' }
-    if (streak >= 7) return { name: '中級者', color: 'from-yellow-300 to-green-400', emoji: '🏆' }
-    if (streak >= 3) return { name: '初心者', color: 'from-blue-300 to-green-300', emoji: '🌱' }
-    return { name: 'ビギナー', color: 'from-gray-300 to-blue-300', emoji: '🥉' }
-  }
-
-  const streakLevel = getStreakLevel(streak)
   const levelInfo = getLevelTitle(level)
   const xpInfo = getXPToNextLevel(totalXP)
 

@@ -24,8 +24,6 @@ export default function HomePage() {
   // デモ用のデータ（実際にはDBから取得）
   const [streak, setStreak] = useState(0)
   const [maxStreak, setMaxStreak] = useState(0)
-  const [totalXP, setTotalXP] = useState(0)
-  const [level, setLevel] = useState(1)
 
   // ユーザーデータを取得
   useEffect(() => {
@@ -34,8 +32,6 @@ export default function HomePage() {
       // 今はデモ用のダミーデータ
       setStreak(7)
       setMaxStreak(15)
-      setTotalXP(1250)
-      setLevel(4)
     }
   }, [session])
 

@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth-simple'
 
 const prisma = new PrismaClient()
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -56,20 +56,21 @@ export async function GET(request: NextRequest) {
 
     // フレンドの情報を整理
     const friends = friendships.map(friendship => {
-      const friend = friendship.senderId === session.user.id 
-        ? friendship.receiver 
-        : friendship.sender
+      // Prismaのincludeで取得したリレーションデータにアクセス
+      const friendData = friendship.senderId === session.user.id 
+        ? (friendship as unknown as { receiver: { id: string; username: string; totalXP: number; level: number; totalStudyTime: number; totalProblems: number; totalCorrect: number; createdAt: Date } }).receiver
+        : (friendship as unknown as { sender: { id: string; username: string; totalXP: number; level: number; totalStudyTime: number; totalProblems: number; totalCorrect: number; createdAt: Date } }).sender
 
       return {
-        id: friend.id,
-        username: friend.username,
-        totalXP: friend.totalXP,
-        level: friend.level,
-        totalStudyTime: friend.totalStudyTime,
-        totalProblems: friend.totalProblems,
-        totalCorrect: friend.totalCorrect,
-        accuracy: friend.totalProblems > 0 
-          ? Math.round((friend.totalCorrect / friend.totalProblems) * 100) 
+        id: friendData.id,
+        username: friendData.username,
+        totalXP: friendData.totalXP,
+        level: friendData.level,
+        totalStudyTime: friendData.totalStudyTime,
+        totalProblems: friendData.totalProblems,
+        totalCorrect: friendData.totalCorrect,
+        accuracy: friendData.totalProblems > 0 
+          ? Math.round((friendData.totalCorrect / friendData.totalProblems) * 100) 
           : 0,
         friendshipId: friendship.id,
         friendSince: friendship.createdAt

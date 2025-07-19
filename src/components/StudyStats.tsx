@@ -1,8 +1,6 @@
 'use client'
 
 interface StudyStatsProps {
-  totalStudyTime: number
-  todayStudyTime: number
   studySessions: Array<{
     date: string
     duration: number
@@ -11,7 +9,7 @@ interface StudyStatsProps {
   formatTime: (seconds: number) => string
 }
 
-export const StudyStats = ({ totalStudyTime, todayStudyTime, studySessions, formatTime }: StudyStatsProps) => {
+export const StudyStats = ({ studySessions, formatTime }: StudyStatsProps) => {
   const getStats = () => {
     const totalSessions = studySessions.length
     const studyDays = new Set(studySessions.map(session => session.date)).size
