@@ -17,6 +17,8 @@ export default function SignIn() {
     setLoading(true)
     setError('')
 
+    console.log('ログイン試行:', { email, password: '***' })
+
     try {
       const result = await signIn('credentials', {
         email,
@@ -24,14 +26,24 @@ export default function SignIn() {
         redirect: false
       })
 
+      console.log('ログイン結果:', result)
+
       if (result?.error) {
+        console.error('ログインエラー:', result.error)
         setError('メールアドレスまたはパスワードが正しくありません')
-      } else {
+      } else if (result?.ok) {
+        console.log('ログイン成功、セッション更新中...')
         // セッションを更新してからリダイレクト
-        await getSession()
+        const session = await getSession()
+        console.log('更新されたセッション:', session)
         router.push('/')
+        router.refresh() // ページを強制更新
+      } else {
+        console.error('予期しないログイン結果:', result)
+        setError('ログイン処理で予期しないエラーが発生しました')
       }
     } catch {
+      console.error('ログイン処理でcatchエラー')
       setError('ログイン中にエラーが発生しました')
     } finally {
       setLoading(false)

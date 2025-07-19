@@ -10,7 +10,7 @@ import UserMenu from '@/components/UserMenu'
 import { Play, Pause, Square, Calendar, Clock, TrendingUp } from 'lucide-react'
 
 export default function HomePage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const {
     isStudying,
     currentSession,
@@ -20,6 +20,8 @@ export default function HomePage() {
     formatTime,
     studySessions
   } = useStudyTimer()
+
+  console.log('HomePage render:', { session, status })
 
   // デモ用のデータ（実際にはDBから取得）
   const [streak, setStreak] = useState(0)
@@ -64,6 +66,19 @@ export default function HomePage() {
             <p className="text-gray-600 mt-1">
               継続は力なり！毎日コツコツ勉強しよう
             </p>
+            {/* ログイン状態の表示 */}
+            {session && (
+              <div className="mt-3 flex items-center space-x-2">
+                <div className="flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                  <span className="font-medium">{session.user.username}</span>
+                  <span className="ml-1">でログイン中</span>
+                </div>
+                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  🎯 レベル {level}
+                </div>
+              </div>
+            )}
           </div>
           <UserMenu />
         </header>
@@ -72,6 +87,26 @@ export default function HomePage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* 左カラム: タイマーとストリーク */}
           <div className="lg:col-span-2 space-y-6">
+            {/* ログイン時のウェルカムメッセージ */}
+            {session && (
+              <div className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">
+                      おかえりなさい、{session.user.username}さん！🎉
+                    </h2>
+                    <p className="text-white/90">
+                      今日も学習を続けて、ストリークを伸ばしていきましょう！
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl mb-2">🔥</div>
+                    <div className="text-sm opacity-90">ログイン中</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* ストリーク表示（ログイン時のみ） */}
             {session && (
               <StreakDisplay
