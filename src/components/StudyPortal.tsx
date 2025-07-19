@@ -12,7 +12,7 @@ export const StudyPortal = () => {
     {
       title: '過去問道場',
       description: '3,200問の過去問でランダム出題',
-      url: 'https://www.ap-siken.com/mobile/apkakomon.php',
+      url: 'https://www.ap-siken.com/apkakomon.php',
       icon: <BookOpen className="w-6 h-6" />,
       color: 'blue',
       embedSupported: true
@@ -20,7 +20,7 @@ export const StudyPortal = () => {
     {
       title: '最新過去問 (令和7年春期)',
       description: '最新の過去問と解説',
-      url: 'https://www.ap-siken.com/mobile/kakomon/07_haru/',
+      url: 'https://www.ap-siken.com/kakomon/07_haru/',
       icon: <Globe className="w-6 h-6" />,
       color: 'green',
       embedSupported: true
@@ -28,7 +28,7 @@ export const StudyPortal = () => {
     {
       title: 'テクノロジ系問題',
       description: '分野別の問題演習',
-      url: 'https://www.ap-siken.com/mobile/index_te.html',
+      url: 'https://www.ap-siken.com/index_te.html',
       icon: <Globe className="w-6 h-6" />,
       color: 'purple',
       embedSupported: true
@@ -36,7 +36,7 @@ export const StudyPortal = () => {
     {
       title: 'マネジメント系問題',
       description: 'プロジェクト管理分野',
-      url: 'https://www.ap-siken.com/mobile/index_ma.html',
+      url: 'https://www.ap-siken.com/index_ma.html',
       icon: <Globe className="w-6 h-6" />,
       color: 'orange',
       embedSupported: true
