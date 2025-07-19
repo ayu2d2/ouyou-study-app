@@ -4,56 +4,155 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Flame, BookOpen, Users, TrendingUp, 
-  Bell, Play, Target, Award, Clock
+  Bell, Play, Target, Award, Clock, StopCircle
 } from 'lucide-react'
 import { cn, formatDuration } from '@/lib/utils'
 import { registerPushNotification } from '@/lib/notifications'
 
 interface StudyStats {
+  totalStudyTime: number
+  totalQuestions: number
+  correctAnswers: number
+  currentStreak: number
+  longestStreak: number
+  weeklyStats: Array<{
+    date: string
+    studyTime: number
+    questions: number
+  }>
+}
+
+interface FriendRanking {
+  id: string
+  name: string
+  studyTime: number
   streak: number
-  todayStudyTime: number
-  questionsToday: number
-  weeklyAverage: number
-  correctRate: number
-  totalPoints: number
+  rank: number
+  sessionsToday: number
+}
+
+interface StudySession {
+  id?: string
+  userId: string
+  startTime: Date
+  category: string
+  questions: number
+  correct: number
 }
 
 export default function HomePage() {
+  // 現在のユーザーID（仮）
+  const [currentUserId] = useState('demo-user')
+  
   const [stats, setStats] = useState<StudyStats>({
-    streak: 7,
-    todayStudyTime: 45,
-    questionsToday: 12,
-    weeklyAverage: 38,
-    correctRate: 75,
-    totalPoints: 1240
+    totalStudyTime: 0,
+    totalQuestions: 0,
+    correctAnswers: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    weeklyStats: []
   })
   
+  const [friends, setFriends] = useState<FriendRanking[]>([])
+  const [showFriends, setShowFriends] = useState(false)
   const [isStudying, setIsStudying] = useState(false)
+  const [currentSession, setCurrentSession] = useState<StudySession | null>(null)
   const [studyStartTime, setStudyStartTime] = useState<Date | null>(null)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     // 通知許可の確認
     if ('Notification' in window) {
       setNotificationsEnabled(Notification.permission === 'granted')
     }
-  }, [])
+    
+    // 初期データの読み込み
+    loadStudyStats()
+    loadFriends()
+  }, [currentUserId])
 
-  const handleStartStudy = () => {
-    setIsStudying(true)
-    setStudyStartTime(new Date())
+  // 学習統計を読み込む
+  const loadStudyStats = async () => {
+    try {
+      const response = await fetch(`/api/study?userId=${currentUserId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data)
+      }
+    } catch (error) {
+      console.error('Failed to load study stats:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleStopStudy = () => {
-    if (studyStartTime) {
-      const duration = Math.floor((Date.now() - studyStartTime.getTime()) / 1000 / 60)
-      setStats(prev => ({
-        ...prev,
-        todayStudyTime: prev.todayStudyTime + duration
-      }))
+  // 友達ランキングを読み込む
+  const loadFriends = async () => {
+    try {
+      const response = await fetch(`/api/friends?userId=${currentUserId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setFriends(data)
+      }
+    } catch (error) {
+      console.error('Failed to load friends:', error)
     }
-    setIsStudying(false)
-    setStudyStartTime(null)
+  }
+
+  // 学習セッション開始
+  const handleStartStudy = async () => {
+    try {
+      const response = await fetch('/api/study', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: currentUserId,
+          category: 'general'
+        })
+      })
+      
+      if (response.ok) {
+        const session = await response.json()
+        setCurrentSession(session)
+        setIsStudying(true)
+        setStudyStartTime(new Date())
+      }
+    } catch (error) {
+      console.error('Failed to start study session:', error)
+    }
+  }
+
+  // 学習セッション終了
+  const handleStopStudy = async () => {
+    if (!currentSession || !studyStartTime) return
+    
+    const duration = Math.floor((Date.now() - studyStartTime.getTime()) / 1000 / 60)
+    const questions = Math.floor(Math.random() * 10) + 5 // デモ用ランダム
+    const correct = Math.floor(questions * 0.7) // デモ用70%正解
+    
+    try {
+      const response = await fetch('/api/study', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: currentSession.id,
+          questions,
+          correct,
+          duration
+        })
+      })
+      
+      if (response.ok) {
+        setIsStudying(false)
+        setCurrentSession(null)
+        setStudyStartTime(null)
+        // 統計を再読み込み
+        loadStudyStats()
+      }
+    } catch (error) {
+      console.error('Failed to end study session:', error)
+    }
   }
 
   const handleEnableNotifications = async () => {
@@ -140,7 +239,7 @@ export default function HomePage() {
           >
             <Flame className="w-16 h-16 mr-4 drop-shadow-lg" />
             <div>
-              <h3 className="text-5xl font-bold mb-1">{stats.streak}日連続</h3>
+              <h3 className="text-5xl font-bold mb-1">{stats.currentStreak}日連続</h3>
               <p className="text-orange-100 text-xl">学習ストリーク</p>
             </div>
           </motion.div>
@@ -171,10 +270,17 @@ export default function HomePage() {
                 onClick={handleStopStudy}
                 className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105"
               >
-                <div className="w-5 h-5 bg-white rounded-sm"></div>
+                <StopCircle className="w-5 h-5" />
                 学習終了
               </button>
             )}
+            <button
+              onClick={() => setShowFriends(!showFriends)}
+              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105"
+            >
+              <Users className="w-5 h-5" />
+              {showFriends ? '統計表示' : '友達と比較'}
+            </button>
           </div>
         </div>
         
@@ -192,62 +298,111 @@ export default function HomePage() {
         )}
       </motion.div>
 
-      {/* 今日の学習状況 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <motion.div className="bg-white rounded-xl shadow-lg p-6" variants={itemVariants}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">学習時間</h3>
-            <Clock className="w-6 h-6 text-blue-500" />
-          </div>
-          <div className="text-3xl font-bold text-blue-600 mb-2">
-            {formatDuration(stats.todayStudyTime)}
-          </div>
-          <div className="text-sm text-gray-500 mb-2">目標: 60分</div>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <motion.div 
-              className="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.min((stats.todayStudyTime / 60) * 100, 100)}%` }}
-              transition={{ duration: 1, delay: 0.5 }}
-            />
-          </div>
-        </motion.div>
+      {/* 学習統計または友達比較 */}
+      {!showFriends ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <motion.div className="bg-white rounded-xl shadow-lg p-6" variants={itemVariants}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">総学習時間</h3>
+              <Clock className="w-6 h-6 text-blue-500" />
+            </div>
+            <div className="text-3xl font-bold text-blue-600 mb-2">
+              {formatDuration(stats.totalStudyTime)}
+            </div>
+            <div className="text-sm text-gray-500 mb-2">累計学習時間</div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <motion.div 
+                className="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min((stats.totalStudyTime / 1000) * 100, 100)}%` }}
+                transition={{ duration: 1, delay: 0.5 }}
+              />
+            </div>
+          </motion.div>
 
-        <motion.div className="bg-white rounded-xl shadow-lg p-6" variants={itemVariants}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">解いた問題</h3>
-            <BookOpen className="w-6 h-6 text-green-500" />
-          </div>
-          <div className="text-3xl font-bold text-green-600 mb-2">{stats.questionsToday}問</div>
-          <div className="text-sm text-gray-500 mb-2">目標: 20問</div>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <motion.div 
-              className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.min((stats.questionsToday / 20) * 100, 100)}%` }}
-              transition={{ duration: 1, delay: 0.7 }}
-            />
-          </div>
-        </motion.div>
+          <motion.div className="bg-white rounded-xl shadow-lg p-6" variants={itemVariants}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">解いた問題</h3>
+              <BookOpen className="w-6 h-6 text-green-500" />
+            </div>
+            <div className="text-3xl font-bold text-green-600 mb-2">{stats.totalQuestions}問</div>
+            <div className="text-sm text-gray-500 mb-2">累計問題数</div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <motion.div 
+                className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min((stats.totalQuestions / 500) * 100, 100)}%` }}
+                transition={{ duration: 1, delay: 0.7 }}
+              />
+            </div>
+          </motion.div>
 
-        <motion.div className="bg-white rounded-xl shadow-lg p-6" variants={itemVariants}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">正答率</h3>
-            <Target className="w-6 h-6 text-purple-500" />
-          </div>
-          <div className="text-3xl font-bold text-purple-600 mb-2">{stats.correctRate}%</div>
-          <div className="text-sm text-gray-500">過去7日間の平均</div>
-        </motion.div>
+          <motion.div className="bg-white rounded-xl shadow-lg p-6" variants={itemVariants}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">正答率</h3>
+              <Target className="w-6 h-6 text-purple-500" />
+            </div>
+            <div className="text-3xl font-bold text-purple-600 mb-2">
+              {stats.totalQuestions > 0 ? Math.round((stats.correctAnswers / stats.totalQuestions) * 100) : 0}%
+            </div>
+            <div className="text-sm text-gray-500">全体正答率</div>
+          </motion.div>
 
-        <motion.div className="bg-white rounded-xl shadow-lg p-6" variants={itemVariants}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">総ポイント</h3>
-            <Award className="w-6 h-6 text-yellow-500" />
-          </div>
-          <div className="text-3xl font-bold text-yellow-600 mb-2">{stats.totalPoints.toLocaleString()}</div>
-          <div className="text-sm text-gray-500">累計獲得ポイント</div>
+          <motion.div className="bg-white rounded-xl shadow-lg p-6" variants={itemVariants}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">最長ストリーク</h3>
+              <Award className="w-6 h-6 text-yellow-500" />
+            </div>
+            <div className="text-3xl font-bold text-yellow-600 mb-2">{stats.longestStreak}日</div>
+            <div className="text-sm text-gray-500">過去最高記録</div>
+          </motion.div>
+        </div>
+      ) : (
+        <motion.div 
+          className="bg-white rounded-2xl shadow-lg p-6 mb-8"
+          variants={itemVariants}
+        >
+          <h3 className="text-2xl font-bold text-gray-800 mb-6">友達ランキング</h3>
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-500">読み込み中...</div>
+          ) : (
+            <div className="space-y-4">
+              {friends.map((friend, index) => (
+                <div 
+                  key={friend.id}
+                  className={cn(
+                    "flex items-center justify-between p-4 rounded-xl",
+                    friend.id === currentUserId 
+                      ? "bg-blue-50 border-2 border-blue-200" 
+                      : "bg-gray-50"
+                  )}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-white font-bold",
+                      index < 3 ? "bg-gradient-to-r from-yellow-400 to-orange-500" : "bg-gray-400"
+                    )}>
+                      {friend.rank}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-800">{friend.name}</div>
+                      <div className="text-sm text-gray-500">
+                        {friend.streak}日連続 • 今日{friend.sessionsToday}回
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-blue-600">
+                      {formatDuration(friend.studyTime)}
+                    </div>
+                    <div className="text-sm text-gray-500">総学習時間</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
-      </div>
+      )}
 
       {/* アクションボタン */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
