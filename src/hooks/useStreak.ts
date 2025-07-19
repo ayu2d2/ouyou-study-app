@@ -74,7 +74,7 @@ export function useStreak() {
   }
 
   // 学習を記録してストリークを更新
-  const recordStudy = (studyTime: number = 0) => {
+  const recordStudy = () => {
     const today = getTodayString()
     const yesterday = getYesterdayString()
     const currentData = loadStreakData()
@@ -139,13 +139,13 @@ export function useStreak() {
       setStreakData(data)
       checkStreak()
     }
-  }, [session])
+  }, [session, checkStreak])
 
   // 学習完了イベントを監視
   useEffect(() => {
     const handleStudyCompleted = (event: CustomEvent) => {
-      const { duration, todayTotal } = event.detail
-      recordStudy(duration)
+      const { duration } = event.detail
+      recordStudy()
     }
 
     window.addEventListener('studyCompleted', handleStudyCompleted as EventListener)
@@ -153,7 +153,7 @@ export function useStreak() {
     return () => {
       window.removeEventListener('studyCompleted', handleStudyCompleted as EventListener)
     }
-  }, [])
+  }, [recordStudy])
 
   // 今日学習したかどうか
   const hasStudiedToday = () => {
