@@ -16,6 +16,8 @@ export default function ForgotPasswordPage() {
     setError('')
     setMessage('')
 
+    console.log('パスワードリセット要求開始:', email)
+
     try {
       const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
@@ -23,14 +25,18 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email })
       })
 
+      console.log('レスポンス状況:', response.status, response.statusText)
+      
       const data = await response.json()
+      console.log('レスポンスデータ:', data)
 
       if (response.ok) {
         setMessage(data.message)
       } else {
         setError(data.error || 'エラーが発生しました')
       }
-    } catch {
+    } catch (error) {
+      console.error('パスワードリセット要求エラー:', error)
       setError('リクエストの送信に失敗しました')
     } finally {
       setLoading(false)

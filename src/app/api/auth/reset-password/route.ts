@@ -5,10 +5,14 @@ import crypto from 'crypto'
 const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
+  console.log('パスワードリセットAPI呼び出し開始')
+  
   try {
     const { email } = await request.json()
+    console.log('リクエストされたメール:', email)
 
     if (!email) {
+      console.log('エラー: メールアドレスが未提供')
       return NextResponse.json(
         { error: 'メールアドレスは必須です' },
         { status: 400 }
@@ -19,9 +23,11 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findUnique({
       where: { email }
     })
+    console.log('ユーザー検索結果:', user ? 'ユーザー見つかりました' : 'ユーザーが見つかりません')
 
     if (!user) {
       // セキュリティのため、存在しないメールアドレスでも成功レスポンスを返す
+      console.log('存在しないユーザーのため、偽の成功レスポンス')
       return NextResponse.json({
         message: 'パスワードリセットメールを送信しました（該当するアカウントが存在する場合）'
       })
