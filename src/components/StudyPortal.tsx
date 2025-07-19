@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { ExternalLink, Globe, BookOpen, X, Maximize2, Minimize2 } from 'lucide-react'
+import { ExternalLink, Globe, BookOpen, X, Maximize2, Minimize2, ZoomIn, ZoomOut } from 'lucide-react'
 
 export const StudyPortal = () => {
   const [showIframe, setShowIframe] = useState(false)
   const [currentUrl, setCurrentUrl] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [zoomLevel, setZoomLevel] = useState(100)
 
   const studyLinks = [
     {
@@ -56,10 +57,23 @@ export const StudyPortal = () => {
     setShowIframe(false)
     setIsFullscreen(false)
     setCurrentUrl('')
+    setZoomLevel(100)
   }
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen)
+  }
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 10, 150))
+  }
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 10, 70))
+  }
+
+  const resetZoom = () => {
+    setZoomLevel(100)
   }
 
   const getColorClasses = (color: string) => {
@@ -124,20 +138,46 @@ export const StudyPortal = () => {
 
       {/* フルスクリーン/モーダル iframe */}
       {showIframe && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className={`bg-white rounded-lg shadow-2xl overflow-hidden transition-all duration-300 ${
             isFullscreen 
               ? 'w-screen h-screen rounded-none' 
-              : 'w-[95vw] h-[90vh] max-w-7xl'
+              : 'w-[98vw] h-[95vh] max-w-none'
           }`}>
             {/* コントロールバー */}
-            <div className="flex items-center justify-between p-3 bg-gray-100 border-b">
+            <div className="flex items-center justify-between p-3 bg-gray-100 border-b shrink-0">
               <div className="flex items-center space-x-2">
                 <Globe className="w-5 h-5 text-gray-600" />
                 <span className="font-medium text-gray-700">AP試験学習サイト</span>
                 <span className="text-sm text-gray-500 hidden sm:inline">- 応用情報技術者試験</span>
               </div>
               <div className="flex items-center space-x-1">
+                {/* ズームコントロール */}
+                <div className="flex items-center space-x-1 mr-2 border-r pr-2">
+                  <button
+                    onClick={handleZoomOut}
+                    className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                    title="縮小"
+                    disabled={zoomLevel <= 70}
+                  >
+                    <ZoomOut className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={resetZoom}
+                    className="px-2 py-1 hover:bg-gray-200 rounded text-xs font-medium text-gray-600"
+                    title="リセット"
+                  >
+                    {zoomLevel}%
+                  </button>
+                  <button
+                    onClick={handleZoomIn}
+                    className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                    title="拡大"
+                    disabled={zoomLevel >= 150}
+                  >
+                    <ZoomIn className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
                 <button
                   onClick={toggleFullscreen}
                   className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
@@ -177,8 +217,11 @@ export const StudyPortal = () => {
               style={{ 
                 height: isFullscreen 
                   ? 'calc(100vh - 60px)' 
-                  : 'calc(90vh - 60px)',
-                minHeight: '600px'
+                  : 'calc(95vh - 100px)',
+                minHeight: isFullscreen ? '600px' : '700px',
+                transform: `scale(${zoomLevel / 100})`,
+                transformOrigin: 'top left',
+                width: `${100 / (zoomLevel / 100)}%`
               }}
             />
           </div>
