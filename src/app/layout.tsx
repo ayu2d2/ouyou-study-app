@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
@@ -9,8 +9,6 @@ export const metadata: Metadata = {
   description: '友達と一緒に応用情報技術者試験の勉強をしよう！ストリーク機能と進捗比較で楽しく学習',
   keywords: ['応用情報技術者試験', '勉強', '過去問', 'ストリーク', '友達'],
   manifest: '/manifest.json',
-  themeColor: '#3b82f6',
-  viewport: 'minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -30,6 +28,15 @@ export const metadata: Metadata = {
     title: '応用情報技術者試験 勉強アプリ',
     description: '友達と一緒に応用情報技術者試験の勉強をしよう！',
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#3b82f6',
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({

@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
-  Flame, BookOpen, Users, Trophy, Calendar, TrendingUp, 
-  Bell, Settings, Play, Target, Award, Clock
+  Flame, BookOpen, Users, TrendingUp, 
+  Bell, Play, Target, Award, Clock
 } from 'lucide-react'
 import { cn, formatDuration } from '@/lib/utils'
-import { registerPushNotification, sendStudyReminder } from '@/lib/notifications'
+import { registerPushNotification } from '@/lib/notifications'
 
 interface StudyStats {
   streak: number
