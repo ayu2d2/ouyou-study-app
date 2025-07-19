@@ -48,13 +48,28 @@ export default function HomePage() {
   
   // 認証チェック
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!session && status !== 'loading') {
       router.push('/auth/signin')
     }
-  }, [status, router])
+  }, [status, session, router])
+  
+  // 認証されていない場合はローディング表示
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
+            <BookOpen className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    )
+  }
   
   // 現在のユーザーID
-  const currentUserId = session?.user?.id || 'demo-user'
+  const currentUserId = session.user.id
+  const user = session.user
   
   const [stats, setStats] = useState<StudyStats>({
     totalStudyTime: 0,
@@ -81,7 +96,7 @@ export default function HomePage() {
     }
     
     // 初期データの読み込み
-    if (currentUserId && currentUserId !== 'demo-user') {
+    if (currentUserId) {
       loadStudyStats()
       loadFriends()
     }
@@ -273,9 +288,9 @@ export default function HomePage() {
           {/* ユーザー情報とログアウト */}
           <div className="absolute top-0 right-0 flex items-center gap-4">
             <div className="flex items-center gap-2 text-gray-600">
-              {session?.user?.image ? (
+              {user.image ? (
                 <img 
-                  src={session.user.image} 
+                  src={user.image} 
                   alt="プロフィール"
                   className="w-8 h-8 rounded-full"
                 />
@@ -283,7 +298,7 @@ export default function HomePage() {
                 <User className="w-8 h-8 text-gray-400" />
               )}
               <span className="text-sm font-medium">
-                {session?.user?.name || session?.user?.email || 'ユーザー'}
+                {user.name || user.email || 'ユーザー'}
               </span>
             </div>
             <button

@@ -15,6 +15,7 @@ model User {
   email         String    @unique
   name          String?
   image         String?
+  password      String?   // パスワード認証用
   emailVerified DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

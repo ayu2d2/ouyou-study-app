@@ -1,23 +1,23 @@
 'use client'
 
-import { signIn, getProviders, useSession } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { BookOpen, Github, Mail, Loader2 } from 'lucide-react'
-
-interface Provider {
-  id: string
-  name: string
-  type: string
-}
+import { BookOpen, Loader2, Eye, EyeOff } from 'lucide-react'
 
 export default function SignInPage() {
   const { status } = useSession()
   const router = useRouter()
-  const [providers, setProviders] = useState<Record<string, Provider> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [email, setEmail] = useState('')
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: ''
+  })
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -25,47 +25,64 @@ export default function SignInPage() {
     }
   }, [status, router])
 
-  useEffect(() => {
-    const loadProviders = async () => {
-      const res = await getProviders()
-      setProviders(res)
-    }
-    loadProviders()
-  }, [])
-
-  const handleSignIn = async (providerId: string) => {
-    setIsLoading(true)
-    try {
-      await signIn(providerId, { callbackUrl: '/' })
-    } catch (error) {
-      console.error('Sign in error:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleEmailSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
     setIsLoading(true)
+
     try {
-      await signIn('email', { email, callbackUrl: '/' })
+      if (isRegistering) {
+        // ユーザー登録
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          setError(data.error || '登録に失敗しました')
+          return
+        }
+
+        // 登録成功後、自動でログイン
+        const result = await signIn('credentials', {
+          email: formData.email,
+          password: formData.password,
+          redirect: false,
+        })
+
+        if (result?.error) {
+          setError('ログインに失敗しました')
+        } else if (result?.ok) {
+          // ログイン成功、少し待ってからリダイレクト
+          window.location.href = '/'
+        }
+      } else {
+        // ログイン
+        const result = await signIn('credentials', {
+          email: formData.email,
+          password: formData.password,
+          redirect: false,
+        })
+
+        if (result?.error) {
+          setError('メールアドレスまたはパスワードが間違っています')
+        } else if (result?.ok) {
+          // ログイン成功、少し待ってからリダイレクト
+          window.location.href = '/'
+        }
+      }
     } catch (error) {
-      console.error('Email sign in error:', error)
+      setError('処理中にエラーが発生しました')
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
-    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -82,93 +99,108 @@ export default function SignInPage() {
               <BookOpen className="w-8 h-8 text-white" />
             </motion.div>
             <h1 className="text-2xl font-bold text-gray-800 mb-2">応用勉強アプリ</h1>
-            <p className="text-gray-600">アカウントにログインして学習を始めましょう</p>
+            <p className="text-gray-600">
+              {isRegistering ? 'アカウントを作成して学習を始めましょう' : 'アカウントにログインして学習を始めましょう'}
+            </p>
           </div>
 
-          {/* ソーシャルログイン */}
-          <div className="space-y-3 mb-6">
-            {providers?.github && (
-              <button
-                onClick={() => handleSignIn('github')}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 rounded-xl font-medium transition-colors disabled:opacity-50"
-              >
-                <Github className="w-5 h-5" />
-                GitHubでログイン
-              </button>
-            )}
-
-            {providers?.google && (
-              <button
-                onClick={() => handleSignIn('google')}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-800 py-3 px-4 rounded-xl font-medium border border-gray-300 transition-colors disabled:opacity-50"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Googleでログイン
-              </button>
-            )}
-          </div>
-
-          {/* メールログイン */}
-          {providers?.email && (
-            <>
-              <div className="relative mb-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">または</span>
-                </div>
-              </div>
-
-              <form onSubmit={handleEmailSignIn} className="space-y-4">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    メールアドレス
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="your@email.com"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading || !email}
-                  className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-medium transition-colors disabled:opacity-50"
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Mail className="w-5 h-5" />
-                  )}
-                  マジックリンクを送信
-                </button>
-              </form>
-            </>
+          {/* エラーメッセージ */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"
+            >
+              {error}
+            </motion.div>
           )}
 
-          {/* フッター */}
-          <div className="mt-8 text-center text-sm text-gray-500">
-            <p>
-              アカウントを作成することで、
-              <br />
-              <a href="#" className="text-blue-600 hover:underline">利用規約</a>
-              と
-              <a href="#" className="text-blue-600 hover:underline">プライバシーポリシー</a>
-              に同意したものとみなされます。
-            </p>
+          {/* ログイン/登録フォーム */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {isRegistering && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  名前
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="山田太郎"
+                />
+              </div>
+            )}
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                メールアドレス
+              </label>
+              <input
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="example@email.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                パスワード
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                  placeholder="パスワード（6文字以上）"
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  処理中...
+                </div>
+              ) : (
+                isRegistering ? '新規登録' : 'ログイン'
+              )}
+            </button>
+          </form>
+
+          {/* 切り替えボタン */}
+          <div className="text-center mt-6">
+            <button
+              onClick={() => {
+                setIsRegistering(!isRegistering)
+                setError('')
+                setFormData({ email: '', password: '', name: '' })
+              }}
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              {isRegistering 
+                ? 'アカウントをお持ちの方はこちら' 
+                : 'アカウントをお持ちでない方はこちら'
+              }
+            </button>
           </div>
         </div>
       </motion.div>
