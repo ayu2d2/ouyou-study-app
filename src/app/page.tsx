@@ -86,28 +86,7 @@ export default function HomePage() {
         {/* メインコンテンツ */}
         <div className="grid lg:grid-cols-3 gap-6">
           {/* 左カラム: タイマーとストリーク */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* ログイン時のウェルカムメッセージ */}
-            {session && (
-              <div className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-bold mb-2">
-                      おかえりなさい、{session.user.username}さん！🎉
-                    </h2>
-                    <p className="text-white/90">
-                      今日も学習を続けて、ストリークを伸ばしていきましょう！
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl mb-2">🔥</div>
-                    <div className="text-sm opacity-90">ログイン中</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ストリーク表示（ログイン時のみ） */}
+          <div className="lg:col-span-2 space-y-6">{/* ストリーク表示（ログイン時のみ） */}
             {session && (
               <StreakDisplay
                 streak={streak}
