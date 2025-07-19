@@ -40,12 +40,15 @@ export default function Ranking() {
       
       if (response.ok) {
         const data = await response.json()
-        setRankingData(data.ranking || [])
+        console.log('Ranking API response:', data) // デバッグ用
+        setRankingData(data) // data.ranking ではなく data 全体を設定
       } else {
         console.error('ランキング取得失敗:', await response.text())
+        setRankingData(null)
       }
     } catch (error) {
       console.error('ランキング取得エラー:', error)
+      setRankingData(null)
     } finally {
       setLoading(false)
     }
@@ -98,7 +101,9 @@ export default function Ranking() {
     return Math.max((score / maxScore) * 100, 2) // 最小2%の幅を確保
   }
 
-  const maxScore = rankingData ? Math.max(...rankingData.ranking.map(r => r.score)) : 0
+  const maxScore = rankingData && rankingData.ranking && rankingData.ranking.length > 0 
+    ? Math.max(...rankingData.ranking.map(r => r.score)) 
+    : 0
 
   if (!session) {
     return (
@@ -174,7 +179,7 @@ export default function Ranking() {
             </div>
           ))}
         </div>
-      ) : rankingData?.ranking.length === 0 ? (
+      ) : !rankingData || !rankingData.ranking || rankingData.ranking.length === 0 ? (
         <div className="text-center py-8">
           <Clock className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500">まだランキングデータがありません</p>
@@ -210,7 +215,7 @@ export default function Ranking() {
           {/* ランキングリスト */}
           {viewMode === 'list' ? (
             // リスト表示
-            rankingData?.ranking.map((entry) => (
+            rankingData?.ranking?.map((entry) => (
               <div
                 key={entry.user.id}
                 className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
@@ -240,7 +245,7 @@ export default function Ranking() {
           ) : (
             // 棒グラフ表示
             <div className="space-y-3">
-              {rankingData?.ranking.map((entry) => (
+              {rankingData?.ranking?.map((entry) => (
                 <div
                   key={entry.user.id}
                   className={`p-3 rounded-lg ${
@@ -284,7 +289,7 @@ export default function Ranking() {
             </div>
           )}
 
-          {rankingData && rankingData.total > rankingData.ranking.length && (
+          {rankingData && rankingData.ranking && rankingData.total > rankingData.ranking.length && (
             <div className="text-center py-3">
               <p className="text-sm text-gray-500">
                 全{rankingData.total}人中 上位{rankingData.ranking.length}人を表示

@@ -3,6 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
+// Prismaクライアントを直接初期化
 const prisma = new PrismaClient()
 
 export const authOptions: NextAuthOptions = {
@@ -73,6 +74,8 @@ export const authOptions: NextAuthOptions = {
       if (token.userId && session.user) {
         session.user.id = token.userId as string
         session.user.username = token.username as string
+        // nameもusernameで設定
+        session.user.name = token.username as string
       }
       return session
     }

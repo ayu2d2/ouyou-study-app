@@ -11,31 +11,27 @@ export async function GET() {
 
     // 簡単なダミーランキングデータを返す
     const dummyRanking = {
-      users: [
+      ranking: [
         {
-          id: session.user.id,
-          username: session.user.username || 'あなた',
-          totalXP: 1000,
-          level: 5,
-          totalStudyTime: 3600,
-          totalProblems: 100,
-          totalCorrect: 85,
-          accuracy: 85,
           rank: 1,
-          score: 3600
+          user: {
+            id: session.user.id,
+            username: session.user.username || 'あなた',
+            totalStudyTime: 3600
+          },
+          score: 3600,
+          isMe: true
         }
       ],
       myRank: {
-        id: session.user.id,
-        username: session.user.username || 'あなた',
-        totalXP: 1000,
-        level: 5,
-        totalStudyTime: 3600,
-        totalProblems: 100,
-        totalCorrect: 85,
-        accuracy: 85,
         rank: 1,
-        score: 3600
+        user: {
+          id: session.user.id,
+          username: session.user.username || 'あなた',
+          totalStudyTime: 3600
+        },
+        score: 3600,
+        isMe: true
       },
       type: 'today',
       category: 'studyTime',
@@ -43,7 +39,7 @@ export async function GET() {
       total: 1
     }
 
-    return NextResponse.json({ ranking: dummyRanking })
+    return NextResponse.json(dummyRanking)
 
   } catch (error) {
     console.error('ランキング取得エラー:', error)
