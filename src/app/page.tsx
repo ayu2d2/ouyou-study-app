@@ -43,14 +43,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* ヘッダー */}
-        <header className="flex justify-between items-center mb-8">
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
               応用情報技術者試験 勉強アプリ
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-sm sm:text-base text-gray-600 mt-1">
               継続は力なり！毎日コツコツ勉強しよう
             </p>
             {/* ログイン状態の表示 */}
@@ -69,9 +69,9 @@ export default function HomePage() {
         </header>
 
         {/* メインコンテンツ */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* 左カラム: タイマーとストリーク */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* ストリーク表示（ログイン時のみ） */}
             {session && (
               <StreakDisplay
@@ -81,18 +81,18 @@ export default function HomePage() {
             )}
 
             {/* 今日の勉強時間 */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center justify-center">
-                  <Clock className="w-6 h-6 mr-2 text-blue-500" />
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center justify-center">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-blue-500" />
                   今日の勉強時間
                 </h2>
                 
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 mb-4">
-                  <div className="text-6xl font-mono font-bold text-blue-600 mb-2">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-6 lg:p-8 mb-4">
+                  <div className="text-4xl sm:text-5xl lg:text-6xl font-mono font-bold text-blue-600 mb-2">
                     {formatTime(todayStudyTime)}
                   </div>
-                  <div className="text-lg text-blue-500 font-medium">
+                  <div className="text-base sm:text-lg text-blue-500 font-medium">
                     {Math.floor(todayStudyTime / 3600) > 0 ? 
                       `${Math.floor(todayStudyTime / 3600)}時間${Math.floor((todayStudyTime % 3600) / 60)}分` :
                       `${Math.floor(todayStudyTime / 60)}分`
@@ -102,13 +102,13 @@ export default function HomePage() {
 
                 {/* 勉強状態の表示 */}
                 {isStudying ? (
-                  <div className="flex items-center justify-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full">
+                  <div className="flex items-center justify-center space-x-2 bg-green-100 text-green-800 px-3 sm:px-4 py-2 rounded-full text-sm sm:text-base">
                     <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                     <span className="font-semibold">勉強中</span>
                     <span className="font-mono">{formatTime(currentSession)}</span>
                   </div>
                 ) : (
-                  <div className="text-gray-500 text-sm">
+                  <div className="text-gray-500 text-xs sm:text-sm text-center px-2">
                     過去問道場を開くと自動でタイマーが開始されます
                   </div>
                 )}
@@ -117,7 +117,7 @@ export default function HomePage() {
           </div>
 
           {/* 右カラム: 過去問ポータル */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <StudyPortal 
               onStudyStart={() => !isStudying && toggleStudying()}
               onStudyStop={() => isStudying && toggleStudying()}

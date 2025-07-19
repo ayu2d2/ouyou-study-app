@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+
+// API Route内でPrismaクライアントを直接初期化
+const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Registration API called')
+    
     const { email, username, password } = await request.json()
+    console.log('Request data:', { email, username, password: '***' })
 
     // バリデーション
     if (!email || !username || !password) {
@@ -22,7 +28,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('Prisma client:', !!prisma)
+    console.log('Prisma user model:', !!prisma?.user)
+
     // 既存ユーザーのチェック
+    console.log('Checking existing users...')
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
@@ -31,6 +41,8 @@ export async function POST(request: NextRequest) {
         ]
       }
     })
+
+    console.log('Existing user check result:', !!existingUser)
 
     if (existingUser) {
       if (existingUser.email === email) {
@@ -48,9 +60,11 @@ export async function POST(request: NextRequest) {
     }
 
     // パスワードをハッシュ化
+    console.log('Hashing password...')
     const hashedPassword = await bcrypt.hash(password, 12)
 
     // ユーザーを作成
+    console.log('Creating user...')
     const user = await prisma.user.create({
       data: {
         email,
@@ -58,6 +72,8 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
       }
     })
+
+    console.log('User created successfully:', user.id)
 
     // パスワードを除いてレスポンス
     const { password: _, ...userWithoutPassword } = user
@@ -73,5 +89,7 @@ export async function POST(request: NextRequest) {
       { error: 'アカウント作成中にエラーが発生しました' },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }

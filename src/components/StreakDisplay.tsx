@@ -29,42 +29,42 @@ function StreakDisplay({
   const streakLevel = getStreakLevel(streak)
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
       {/* ユーザー情報 */}
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3">
           {session?.user?.username || 'ゲスト'}さんの進捗
         </h2>
         <div className="flex items-center justify-center space-x-2 mb-4">
-          <span className="text-2xl">{streakLevel.emoji}</span>
-          <span className={`px-3 py-1 rounded-full text-white text-sm font-medium bg-gradient-to-r ${streakLevel.color}`}>
+          <span className="text-xl sm:text-2xl">{streakLevel.emoji}</span>
+          <span className={`px-3 py-1 rounded-full text-white text-xs sm:text-sm font-medium bg-gradient-to-r ${streakLevel.color}`}>
             {streakLevel.name}
           </span>
         </div>
       </div>
 
       {/* ストリーク情報 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="flex flex-row justify-center gap-8 sm:gap-12">
         {/* 現在のストリーク */}
-        <div className="text-center">
+        <div className="text-center flex-1 max-w-[140px]">
           <motion.div
-            className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-red-500 text-white mb-3"
+            className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-orange-400 to-red-500 text-white mb-3 mx-auto"
             animate={{ scale: streak > 0 ? [1, 1.1, 1] : 1 }}
             transition={{ duration: 0.5, repeat: streak > 0 ? Infinity : 0, repeatDelay: 2 }}
           >
-            <Flame className="w-12 h-12" />
+            <Flame className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
           </motion.div>
-          <div className="text-3xl font-bold text-gray-800">{streak}</div>
-          <div className="text-sm text-gray-600">連続記録</div>
+          <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-1">{streak}</div>
+          <div className="text-xs sm:text-sm text-gray-600">連続記録</div>
         </div>
 
         {/* 最高ストリーク */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white mb-3">
-            <Trophy className="w-12 h-12" />
+        <div className="text-center flex-1 max-w-[140px]">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white mb-3 mx-auto">
+            <Trophy className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
           </div>
-          <div className="text-3xl font-bold text-gray-800">{maxStreak}</div>
-          <div className="text-sm text-gray-600">最高記録</div>
+          <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-1">{maxStreak}</div>
+          <div className="text-xs sm:text-sm text-gray-600">最高記録</div>
         </div>
       </div>
     </div>
