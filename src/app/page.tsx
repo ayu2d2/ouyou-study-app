@@ -6,7 +6,7 @@ import { useStudyTimer } from '@/hooks/useStudyTimer'
 import { StudyPortal } from '@/components/StudyPortal'
 import StreakDisplay from '@/components/StreakDisplay'
 import UserMenu from '@/components/UserMenu'
-import { Play, Pause, Calendar, Clock } from 'lucide-react'
+import { Clock } from 'lucide-react'
 
 export default function HomePage() {
   const { data: session, status } = useSession()
@@ -77,57 +77,41 @@ export default function HomePage() {
               <StreakDisplay
                 streak={streak}
                 maxStreak={maxStreak}
-                studyTime={todayStudyTime}
               />
             )}
 
-            {/* 勉強タイマー */}
+            {/* 今日の勉強時間 */}
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center">
-                  <Clock className="w-6 h-6 mr-2 text-indigo-500" />
-                  勉強タイマー
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center justify-center">
+                  <Clock className="w-6 h-6 mr-2 text-blue-500" />
+                  今日の勉強時間
                 </h2>
                 
-                <div className="text-6xl font-mono font-bold text-gray-800 mb-6">
-                  {formatTime(currentSession)}
-                </div>
-                
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={toggleStudying}
-                    className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                      isStudying
-                        ? 'bg-red-500 hover:bg-red-600 text-white'
-                        : 'bg-green-500 hover:bg-green-600 text-white'
-                    }`}
-                  >
-                    {isStudying ? (
-                      <>
-                        <Pause className="w-5 h-5" />
-                        <span>終了</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-5 h-5" />
-                        <span>開始</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* 今日の勉強時間 */}
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-5 h-5 text-blue-500" />
-                    <span className="font-medium text-gray-700">今日の勉強時間</span>
-                  </div>
-                  <span className="text-xl font-bold text-blue-600">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 mb-4">
+                  <div className="text-6xl font-mono font-bold text-blue-600 mb-2">
                     {formatTime(todayStudyTime)}
-                  </span>
+                  </div>
+                  <div className="text-lg text-blue-500 font-medium">
+                    {Math.floor(todayStudyTime / 3600) > 0 ? 
+                      `${Math.floor(todayStudyTime / 3600)}時間${Math.floor((todayStudyTime % 3600) / 60)}分` :
+                      `${Math.floor(todayStudyTime / 60)}分`
+                    }の学習
+                  </div>
                 </div>
+
+                {/* 勉強状態の表示 */}
+                {isStudying ? (
+                  <div className="flex items-center justify-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="font-semibold">勉強中</span>
+                    <span className="font-mono">{formatTime(currentSession)}</span>
+                  </div>
+                ) : (
+                  <div className="text-gray-500 text-sm">
+                    過去問道場を開くと自動でタイマーが開始されます
+                  </div>
+                )}
               </div>
             </div>
           </div>

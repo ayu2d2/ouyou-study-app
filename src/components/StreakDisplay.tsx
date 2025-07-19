@@ -2,18 +2,16 @@
 
 import { useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
-import { Trophy, Flame, Clock } from 'lucide-react'
+import { Trophy, Flame } from 'lucide-react'
 
 interface StreakDisplayProps {
   streak: number
   maxStreak: number
-  studyTime: number
 }
 
 function StreakDisplay({ 
   streak, 
-  maxStreak, 
-  studyTime
+  maxStreak
 }: StreakDisplayProps) {
   const { data: session } = useSession()
 
@@ -67,19 +65,6 @@ function StreakDisplay({
           </div>
           <div className="text-3xl font-bold text-gray-800">{maxStreak}</div>
           <div className="text-sm text-gray-600">最高記録</div>
-        </div>
-      </div>
-
-      {/* 今日の勉強時間 */}
-      <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
-        <div className="flex items-center justify-center space-x-3">
-          <Clock className="w-6 h-6 text-blue-500" />
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">
-              {Math.floor(studyTime / 3600)}:{Math.floor((studyTime % 3600) / 60).toString().padStart(2, '0')}:{(studyTime % 60).toString().padStart(2, '0')}
-            </div>
-            <div className="text-sm text-blue-500">今日の勉強時間</div>
-          </div>
         </div>
       </div>
     </div>
