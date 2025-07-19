@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { ExternalLink, Globe, BookOpen, X, Maximize2, Minimize2, ZoomIn, ZoomOut } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { ExternalLink, Globe, BookOpen, X, Maximize2, Minimize2, ZoomIn, ZoomOut, Monitor } from 'lucide-react'
 
 export const StudyPortal = () => {
   const [showIframe, setShowIframe] = useState(false)
   const [currentUrl, setCurrentUrl] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [zoomLevel, setZoomLevel] = useState(100)
+  const [autoResize, setAutoResize] = useState(true)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   const studyLinks = [
     {
@@ -58,6 +60,7 @@ export const StudyPortal = () => {
     setIsFullscreen(false)
     setCurrentUrl('')
     setZoomLevel(100)
+    setAutoResize(true)
   }
 
   const toggleFullscreen = () => {
@@ -75,6 +78,136 @@ export const StudyPortal = () => {
   const resetZoom = () => {
     setZoomLevel(100)
   }
+
+  const toggleAutoResize = () => {
+    setAutoResize(!autoResize)
+  }
+
+  // iframeが読み込まれた後に自動リサイズのスタイルを適用
+  useEffect(() => {
+    if (showIframe && iframeRef.current && autoResize) {
+      const iframe = iframeRef.current
+      
+      const applyResponsiveStyles = () => {
+        try {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+          if (iframeDoc) {
+            // 既存のスタイルを削除
+            const existingStyle = iframeDoc.getElementById('responsive-injected-style')
+            if (existingStyle) {
+              existingStyle.remove()
+            }
+
+            // レスポンシブ用のスタイルを注入
+            const style = iframeDoc.createElement('style')
+            style.id = 'responsive-injected-style'
+            style.textContent = `
+              /* 全体的なレスポンシブ調整 */
+              * {
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+              }
+              
+              body {
+                transform-origin: top left !important;
+                width: 100% !important;
+                overflow-x: auto !important;
+                margin: 0 !important;
+                padding: 10px !important;
+              }
+              
+              /* テーブル調整 */
+              table {
+                width: 100% !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+              }
+              
+              td, th {
+                word-wrap: break-word !important;
+                overflow-wrap: break-word !important;
+                max-width: 100% !important;
+              }
+              
+              /* コンテナ調整 */
+              .container, .main, .content, div[width] {
+                max-width: 100% !important;
+                width: 100% !important;
+              }
+              
+              /* フォーム要素調整 */
+              input, select, textarea {
+                max-width: 100% !important;
+                width: 100% !important;
+              }
+              
+              /* 固定幅要素の調整 */
+              .fixed-width, [width] {
+                width: auto !important;
+                max-width: 100% !important;
+              }
+              
+              /* 画像調整 */
+              img {
+                max-width: 100% !important;
+                height: auto !important;
+              }
+              
+              /* ナビゲーション調整 */
+              .nav, .navigation, .menu {
+                flex-wrap: wrap !important;
+                overflow-x: auto !important;
+              }
+              
+              /* フォントサイズの最適化 */
+              body, div, span, p, td, th {
+                font-size: clamp(12px, 2.5vw, 16px) !important;
+                line-height: 1.4 !important;
+              }
+              
+              /* モバイル対応のメディアクエリ */
+              @media (max-width: 768px) {
+                body {
+                  font-size: 14px !important;
+                }
+                table {
+                  font-size: 12px !important;
+                }
+              }
+            `
+            iframeDoc.head.appendChild(style)
+
+            // ビューポートメタタグを追加/更新
+            let viewport = iframeDoc.querySelector('meta[name="viewport"]')
+            if (!viewport) {
+              viewport = iframeDoc.createElement('meta')
+              viewport.setAttribute('name', 'viewport')
+              iframeDoc.head.appendChild(viewport)
+            }
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=3, user-scalable=yes')
+          }
+        } catch (error) {
+          console.log('Cross-origin restrictions prevent iframe styling:', error)
+        }
+      }
+
+      // iframeの読み込み完了を待つ
+      const handleLoad = () => {
+        setTimeout(applyResponsiveStyles, 100) // 少し遅延を追加
+      }
+
+      iframe.addEventListener('load', handleLoad)
+      
+      // 既に読み込まれている場合は即座に適用
+      if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+        handleLoad()
+      }
+      
+      return () => {
+        iframe.removeEventListener('load', handleLoad)
+      }
+    }
+  }, [showIframe, autoResize])
 
   const getColorClasses = (color: string) => {
     const colors = {
@@ -152,6 +285,18 @@ export const StudyPortal = () => {
                 <span className="text-sm text-gray-500 hidden sm:inline">- 応用情報技術者試験</span>
               </div>
               <div className="flex items-center space-x-1">
+                {/* 自動リサイズ切り替え */}
+                <button
+                  onClick={toggleAutoResize}
+                  className={`p-2 rounded-lg transition-colors mr-2 ${
+                    autoResize 
+                      ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' 
+                      : 'hover:bg-gray-200 text-gray-600'
+                  }`}
+                  title={autoResize ? '自動調整: ON' : '自動調整: OFF'}
+                >
+                  <Monitor className="w-4 h-4" />
+                </button>
                 {/* ズームコントロール */}
                 <div className="flex items-center space-x-1 mr-2 border-r pr-2">
                   <button
@@ -210,6 +355,7 @@ export const StudyPortal = () => {
             
             {/* iframe */}
             <iframe
+              ref={iframeRef}
               src={currentUrl}
               className="w-full border-0"
               title="AP試験学習サイト"
@@ -217,11 +363,16 @@ export const StudyPortal = () => {
               style={{ 
                 height: isFullscreen 
                   ? 'calc(100vh - 60px)' 
-                  : 'calc(95vh - 100px)',
+                  : 'calc(95vh - 120px)',
                 minHeight: isFullscreen ? '600px' : '700px',
-                transform: `scale(${zoomLevel / 100})`,
+                transform: autoResize 
+                  ? `scale(${zoomLevel / 100})`
+                  : `scale(${zoomLevel / 100})`,
                 transformOrigin: 'top left',
-                width: `${100 / (zoomLevel / 100)}%`
+                width: autoResize 
+                  ? `${100 / (zoomLevel / 100)}%`
+                  : `${100 / (zoomLevel / 100)}%`,
+                border: autoResize ? '1px solid #e5e7eb' : 'none'
               }}
             />
           </div>
