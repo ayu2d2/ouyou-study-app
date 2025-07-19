@@ -31,11 +31,16 @@ export default function SignIn() {
         await getSession()
         router.push('/')
       }
-    } catch (err) {
+    } catch {
       setError('ログイン中にエラーが発生しました')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleDemoLogin = () => {
+    setEmail('demo@example.com')
+    setPassword('demo123')
   }
 
   return (
@@ -47,6 +52,20 @@ export default function SignIn() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             勉強を続けてストリークを伸ばそう！
+          </p>
+        </div>
+        
+        {/* デモ用のお知らせ */}
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
+          <p className="text-sm">
+            <strong>デモ環境:</strong> 
+            <button 
+              onClick={handleDemoLogin}
+              className="ml-2 underline hover:no-underline"
+            >
+              demo@example.com / demo123
+            </button> 
+            でログインできます
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

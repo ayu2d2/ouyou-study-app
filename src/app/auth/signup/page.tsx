@@ -34,7 +34,7 @@ export default function SignUp() {
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch('/api/auth/register-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ export default function SignUp() {
           router.push('/auth/signin')
         }, 2000)
       }
-    } catch (err) {
+    } catch {
       setError('アカウント作成中にエラーが発生しました')
     } finally {
       setLoading(false)
