@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/safe-prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-simple'
 
-const prisma = new PrismaClient()
+// Using shared prisma instance from safe-prisma
 
 export async function GET() {
   try {
@@ -55,7 +55,8 @@ export async function GET() {
     })
 
     // フレンドの情報を整理
-    const friends = friendships.map(friendship => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const friends = friendships.map((friendship: any) => {
       // Prismaのincludeで取得したリレーションデータにアクセス
       const friendData = friendship.senderId === session.user.id 
         ? (friendship as unknown as { receiver: { id: string; username: string; totalXP: number; level: number; totalStudyTime: number; totalProblems: number; totalCorrect: number; createdAt: Date } }).receiver

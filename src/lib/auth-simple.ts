@@ -1,10 +1,7 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-
-// Prismaクライアントを直接初期化
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/safe-prisma'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -51,6 +48,14 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error('認証エラー:', error)
+          
+          // Check if it's a database connection error
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          if ((error as { code?: string }).code === 'P2021' || errorMessage.includes('does not exist')) {
+            console.error('Database table does not exist. Please run database migrations.')
+            console.error('Run: npm run db:setup')
+          }
+          
           return null
         }
       }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-simple'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/safe-prisma'
 
 export async function GET(request: Request) {
   try {
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     // フレンドデータを取得（Prismaで直接取得）
     let friends: { id: string; username: string; totalStudyTime: number }[] = []
     try {
-      const prisma = new PrismaClient()
+      // Using shared prisma instance from safe-prisma
       
       const friendships = await prisma.friendship.findMany({
         where: {

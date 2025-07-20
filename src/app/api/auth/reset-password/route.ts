@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/safe-prisma'
 import crypto from 'crypto'
 
-const prisma = new PrismaClient()
+// Using shared prisma instance from safe-prisma
 
 export async function POST(request: NextRequest) {
   console.log('パスワードリセットAPI呼び出し開始')
