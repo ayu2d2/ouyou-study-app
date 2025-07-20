@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 
 interface StreakData {
@@ -112,7 +112,7 @@ export function useStreak() {
   }
 
   // ストリークをチェック（連続性を確認）
-  const checkStreak = () => {
+  const checkStreak = useCallback(() => {
     const today = getTodayString()
     const yesterday = getYesterdayString()
     const currentData = loadStreakData()
@@ -130,7 +130,7 @@ export function useStreak() {
       }
       saveStreakData(newData)
     }
-  }
+  }, []) // 依存関係なし
 
   // 初期化
   useEffect(() => {
